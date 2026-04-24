@@ -74,7 +74,7 @@ def main():
     if not config_errors:
         input_files_paths["synergy_file"] = resolve_path(Path(input_dir), str(synergy_file))
 
-
+# Validate that all active features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_key in FEATURE_FILE_MAP.items():
   
         if feature in active_features:
