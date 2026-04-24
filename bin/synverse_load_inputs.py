@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import json
+import os
 from pathlib import Path
 import sys
 import yaml
@@ -56,17 +57,36 @@ def main():
     output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute path.
 
     input_files_raw  = input_settings["input_files"]
-    active_features  = [f["name"] for f in config.get("drug_features", [])]
+    active_features  = [f["name"] for f in config.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
+
+
+# if a the synergy file is missing, or does not have proper path or is empty, I raise an error. 
+    if synergy_raw is None:
+        raise KeyError("'synergy_file' is missing from input_files in the config")
+    if not isinstance(synergy_raw, (str, os.PathLike)):
+        raise TypeError("Value for 'synergy_file' must be a path string")
+    if str(synergy_raw).strip() == "":
+        raise ValueError("Value for 'synergy_file' is empty")
 
     input_files = {
-        "synergy_file": resolve_path(Path(input_dir), input_files_raw["synergy_file"])
+        "synergy_file": resolve_path(Path(input_dir), str(synergy_raw))
     }
-
-    for feature, file_key in FEATURE_FILE_MAP.items():
+    
+# if one of the files of the active features in the config is missing , or does not have proper path or is empty, I raise an error.
         if feature in active_features:
-            input_files[file_key] = resolve_path(Path(input_dir), input_files_raw[file_key])
+            if file_key is None:
+                missing.append(f"Feature '{feature}' is active but has no corresponding file key in the config")
+                continue
+            raw = input_files_raw.get(file_key)
+            if raw is None:
+                raise KeyError(f"'{file_key}' is missing from input_files in the config")
+            if not isinstance(raw, (str, os.PathLike)):
+                raise TypeError(f"Value for '{file_key}' must be a path string")
+            if str(raw).strip() == "":
+                raise ValueError(f"Value for '{file_key}' is empty")
 
-    missing = [p for p in input_files.values() if not Path(p).exists()]
+            input_files[file_key] = resolve_path(Path(input_dir), str(raw)) # For each feature in the active features list, add its corresponding file path to the input_files dictionary.
+
     if missing:
         raise FileNotFoundError("Missing input files:\n" + "\n".join(missing))
 
@@ -79,8 +99,8 @@ def main():
         "input_files":     input_files,
     }
 
-    Path("loaded_inputs.json").write_text(
-        json.dumps(manifest, indent=2),
+    Path("loaded_inputs.json").write_text( # Writes the manifest dictionary as a JSON string to a file named "loaded_inputs.json" in the current working directory.
+        json.dumps(manifest, indent=2), 
         encoding="utf-8",
     )
 
