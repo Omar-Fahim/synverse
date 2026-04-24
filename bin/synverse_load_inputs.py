@@ -56,39 +56,48 @@ def main():
     input_dir = resolve_path(repo_root, input_settings["input_dir"]) # Resolves the input directory path relative to the repository root and converts it to an absolute path.
     output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute path.
 
-    input_files_raw  = input_settings["input_files"]
+    input_files  = input_settings["input_files"]
     active_features  = [f["name"] for f in config.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
 
+    config_errors = []
 
-# if a the synergy file is missing, or does not have proper path or is empty, I raise an error. 
-    if synergy_raw is None:
-        raise KeyError("'synergy_file' is missing from input_files in the config")
-    if not isinstance(synergy_raw, (str, os.PathLike)):
+    # validate synergy_file exists in config and is a non-empty path-like string
+    synergy_file= input_files.get("synergy_file")
+    if synergy_file is None:
+        config_errors.append("'synergy_file' is missing from input_files in the config")
+    elif not isinstance(synergy_file, (str, os.PathLike)):
         raise TypeError("Value for 'synergy_file' must be a path string")
-    if str(synergy_raw).strip() == "":
-        raise ValueError("Value for 'synergy_file' is empty")
+    elif str(synergy_file).strip() == "":
+        config_errors.append("Value for 'synergy_file' is empty")
 
-    input_files = {
-        "synergy_file": resolve_path(Path(input_dir), str(synergy_raw))
-    }
-    
-# if one of the files of the active features in the config is missing , or does not have proper path or is empty, I raise an error.
+    input_files_paths = {}
+    if not config_errors:
+        input_files_paths["synergy_file"] = resolve_path(Path(input_dir), str(synergy_file))
+
+
+    for feature, file_key in FEATURE_FILE_MAP.items():
+  
         if feature in active_features:
-            if file_key is None:
-                missing.append(f"Feature '{feature}' is active but has no corresponding file key in the config")
+            if input_files.get(file_key) is None:
+                config_errors.append(f"Feature '{feature}' is active but has no corresponding file key in the config")
                 continue
-            raw = input_files_raw.get(file_key)
-            if raw is None:
-                raise KeyError(f"'{file_key}' is missing from input_files in the config")
-            if not isinstance(raw, (str, os.PathLike)):
+
+            if not isinstance(input_files.get(file_key), (str, os.PathLike)):
                 raise TypeError(f"Value for '{file_key}' must be a path string")
-            if str(raw).strip() == "":
-                raise ValueError(f"Value for '{file_key}' is empty")
 
-            input_files[file_key] = resolve_path(Path(input_dir), str(raw)) # For each feature in the active features list, add its corresponding file path to the input_files dictionary.
+            if str(input_files.get(file_key)).strip() == "":
+                config_errors.append(f"Value for '{file_key}' is empty")
+                continue
 
-    if missing:
-        raise FileNotFoundError("Missing input files:\n" + "\n".join(missing))
+            input_files_paths[file_key] = resolve_path(Path(input_dir), str(input_files.get(file_key))) 
+
+ 
+
+
+    if file_missing:
+        parts.append("Missing input files on disk:")
+        parts.extend(file_missing)
+        raise FileNotFoundError("\n".join(parts))
 
     manifest = {
         "config":          str(config_path),
