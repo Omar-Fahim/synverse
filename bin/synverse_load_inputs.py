@@ -34,6 +34,11 @@ FEATURE_FILE_MAP = {
     "d1hot":    None,          
 }
 
+CELL_LINE_FEATURE_FILE_MAP = {
+    "c1hot": [],
+    "genex": ["genex_file"],
+    "genex_lincs_1000": ["genex_file", "lincs"],
+}
 
 def main():
     args = parse_args() # Parses the command line arguments.
@@ -57,7 +62,7 @@ def main():
     output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute path.
 
     input_files  = input_settings["input_files"]
-    active_features  = [f["name"] for f in config.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
+    active_drug_feature_names  = [f["name"] for f in config.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
 
     config_errors = []
 
@@ -77,7 +82,7 @@ def main():
 # Validate that all active features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_key in FEATURE_FILE_MAP.items():
   
-        if feature in active_features:
+        if feature in active_drug_feature_names:
             if input_files.get(file_key) is None:
                 config_errors.append(f"Feature '{feature}' is active but has no corresponding file key in the config")
                 continue
@@ -91,21 +96,42 @@ def main():
 
             input_files_paths[file_key] = resolve_path(Path(input_dir), str(input_files.get(file_key))) 
 
- 
-
-
     if file_missing:
         parts.append("Missing input files on disk:")
         parts.extend(file_missing)
         raise FileNotFoundError("\n".join(parts))
+
+
+    
+    active_cell_line_feature_names  = [f["name"] for f in config.get("cell_line_features", [])]
+
+    for feature, file_keys in CELL_LINE_FEATURE_FILE_MAP.items():
+        if feature in active_cell_line_feature_names:
+            for file_key in file_keys:
+                if input_files.get(file_key) is None:
+                    config_errors.append(f"Feature '{feature}' is active but has no corresponding file key '{file_key}' in the config")
+                    continue
+
+                if not isinstance(input_files.get(file_key), (str, os.PathLike)):
+                    raise TypeError(f"Value for '{file_key}' must be a path string")
+
+                if str(input_files.get(file_key)).strip() == "":
+                    config_errors.append(f"Value for '{file_key}' is empty")
+                    continue
+
+                input_files_paths[file_key] = resolve_path(Path(input_dir), str(input_files.get(file_key)))
 
     manifest = {
         "config":          str(config_path),
         "input_dir":       input_dir,
         "output_dir":      output_dir,
         "score_name":      input_settings["score_name"],
-        "active_features": active_features,
+        "active_features": {
+            "drug": active_drug_feature_names,
+            "cell_line": active_cell_line_feature_names,
+        },
         "input_files":     input_files,
+        "input_files_abs_paths": input_files_paths,
     }
 
     Path("loaded_inputs.json").write_text( # Writes the manifest dictionary as a JSON string to a file named "loaded_inputs.json" in the current working directory.
