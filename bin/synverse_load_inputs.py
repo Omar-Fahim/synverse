@@ -3,7 +3,7 @@ import argparse
 import json
 import os
 from pathlib import Path
-import sys
+
 import yaml
 
 
@@ -74,12 +74,18 @@ def main():
     elif str(synergy_file).strip() == "":
         config_errors.append("Value for 'synergy_file' is empty")
 
-   
+    input_files_paths = {}
+    input_files_paths["synergy_file"] = str(resolve_path(input_dir, str(synergy_file)))
+
+    resolved_synergy_path = resolve_path(input_dir, str(synergy_file))
+    if not resolved_synergy_path.exists():
+        config_errors.append(f"File for 'synergy_file' does not exist: {resolved_synergy_path}")
+    else:
+        input_files_paths["synergy_file"] = str(resolved_synergy_path)
+    
     if config_errors:
         raise ValueError("\n".join(config_errors))
 
-    input_files_paths = {}
-    input_files_paths["synergy_file"] = str(resolve_path(input_dir, str(synergy_file)))
 
 # Validate that all active features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_key in FEATURE_FILE_MAP.items():
@@ -119,12 +125,15 @@ def main():
                     config_errors.append(f"Feature '{feature}' is active but has no corresponding file key '{file_key}' in the config")
                     continue
 
+                if not isinstance(input_files.get(file_key), (str, os.PathLike)):
+                    raise TypeError(f"Value for '{file_key}' must be a path string")
+
+
                 if str(input_files.get(file_key)).strip() == "":
                     config_errors.append(f"Value for '{file_key}' is empty")
                     continue
                     
-                if not isinstance(input_files.get(file_key), (str, os.PathLike)):
-                    raise TypeError(f"Value for '{file_key}' must be a path string")
+                
 
                 
 
