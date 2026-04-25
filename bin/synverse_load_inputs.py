@@ -61,7 +61,7 @@ def main():
     output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute Path.
 
     input_files  = input_settings["input_files"]
-    active_drug_feature_names  = [f["name"] for f in config.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
+    active_drug_feature_names  = [f["name"] for f in input_settings.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
 
     config_errors = []
 
@@ -75,14 +75,15 @@ def main():
         config_errors.append("Value for 'synergy_file' is empty")
 
     input_files_paths = {}
-    input_files_paths["synergy_file"] = str(resolve_path(input_dir, str(synergy_file)))
 
-    resolved_synergy_path = resolve_path(input_dir, str(synergy_file))
-    if not resolved_synergy_path.exists():
-        config_errors.append(f"File for 'synergy_file' does not exist: {resolved_synergy_path}")
-    else:
-        input_files_paths["synergy_file"] = str(resolved_synergy_path)
-    
+    # only resolve if there are no prior config errors for synergy_file
+    if not config_errors:
+        resolved_synergy_path = resolve_path(input_dir, str(synergy_file))
+        if not resolved_synergy_path.exists():
+            config_errors.append(f"File for 'synergy_file' does not exist: {resolved_synergy_path}")
+        else:
+            input_files_paths["synergy_file"] = str(resolved_synergy_path)
+
     if config_errors:
         raise ValueError("\n".join(config_errors))
 
@@ -116,7 +117,7 @@ def main():
         raise ValueError("\n".join(config_errors))
 
     
-    active_cell_line_feature_names  = [f["name"] for f in config.get("cell_line_features", [])]
+    active_cell_line_feature_names  = [f["name"] for f in input_settings.get("cell_line_features", [])]
 
     for feature, file_keys in CELL_LINE_FEATURE_FILE_MAP.items():
         if feature in active_cell_line_feature_names:
@@ -155,7 +156,6 @@ def main():
             "drug": active_drug_feature_names,
             "cell_line": active_cell_line_feature_names,
         },
-        "input_files":     input_files,
         "input_files_abs_paths": input_files_paths,
     }
 
