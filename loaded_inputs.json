@@ -1,0 +1,18 @@
+{
+  "config": "/home/omar/projects/nf-core-synverse/assets/testdata/synverse_test_config.yaml",
+  "input_dir": "/home/omar/projects/nf-core-synverse/assets/input",
+  "output_dir": "/home/omar/projects/nf-core-synverse/outputs_debug",
+  "score_name": "S_mean_mean",
+  "active_features": {
+    "drug": [
+      "MACCS"
+    ],
+    "cell_line": [
+      "c1hot"
+    ]
+  },
+  "input_files_abs_paths": {
+    "synergy_file": "/home/omar/projects/nf-core-synverse/assets/input/synergy/synergy_scores_S_mean_mean.tsv",
+    "maccs_file": "/home/omar/projects/nf-core-synverse/assets/input/drug/MACCS.tsv"
+  }
+}
