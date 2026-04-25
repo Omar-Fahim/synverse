@@ -16,37 +16,36 @@
 //               list (`[]`) instead of a file can be used to work around this issue.
 
 process LOADINPUTS {
-    tag '$bam'
+    tag "${synverse_config.baseName}"
     label 'process_single'
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-        'biocontainers/YOUR-TOOL-HERE' }"
+    'docker://python:3.11':
+    'python:3.11' }"
 
-    input:// TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
-    //               MUST be provided as an input via a Groovy Map called "meta".
-    //               This information may not be required in some instances e.g. indexing reference genome files:
-    //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
-    // TODO nf-core: Where applicable please provide/convert compressed files as input/output
-    //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
-    path bam
+    input:    
+    path synverse_config
+
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    path "*.bam", emit: bam
-    // TODO nf-core: List additional required output channels/values here
-    // TODO nf-core: Update the command here to obtain the version number of the software used in this module
-    // TODO nf-core: If multiple software packages are used in this module, all MUST be added here
-    //               by copying the line below and replacing the current tool with the extra tool(s)
-    tuple val("${task.process}"), val('loadinputs'), eval("loadinputs --version"), topic: versions, emit: versions_loadinputs
+    path 'loaded_inputs.json', emit: loaded_inputs
+    path 'versions.yml', emit: versions
 
-    when:
-    task.ext.when == null || task.ext.when
+ 
 
     script:
-    def args = task.ext.args ?: ''
+    """
+    synverse_load_inputs.py \\
+        --config ${synverse_config}
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+        pyyaml: \$(python -c "import yaml; print(yaml.__version__)")
+    END_VERSIONS
+    """
     
     // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
     //               If the software is unable to output a version number on the command-line then it can be manually specified
@@ -57,15 +56,8 @@ process LOADINPUTS {
     //               using the Nextflow "task" variable e.g. "--threads $task.cpus"
     // TODO nf-core: Please replace the example samtools command below with your module's command
     // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
-    """
-    loadinputs \\
-        $args \\
-        -@ $task.cpus \\
-        $bam
-    """
 
-    stub:
-    def args = task.ext.args ?: ''
+
     
     // TODO nf-core: A stub section should mimic the execution of the original module as best as possible
     //               Have a look at the following examples:
@@ -74,9 +66,5 @@ process LOADINPUTS {
     // TODO nf-core: If the module doesn't use arguments ($args), you SHOULD remove:
     //               - The definition of args `def args = task.ext.args ?: ''` above.
     //               - The use of the variable in the script `echo $args ` below.
-    """
-    echo $args
-    
-    touch ${prefix}.bam
-    """
+
 }
