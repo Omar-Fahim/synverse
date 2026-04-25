@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline' //Takes version info and converts it into structured YAML
-include { LOAD_INPUTS_CUSTOM     } from '../subworkflows/local/load_inputs_custom'
+include { LOAD_INPUTS     } from '../subworkflows/local/load_inputs'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -21,10 +21,10 @@ workflow SYNVERSE {
 
     ch_versions = channel.empty() // Here I intialise an empty channel to collect software versions .
 
-    LOAD_INPUTS_CUSTOM(
+    LOAD_INPUTS(
         synverse_config
     )
-    ch_versions = ch_versions.mix(LOAD_INPUTS_CUSTOM.out.versions) // Combine two channels into one
+    ch_versions = ch_versions.mix(LOAD_INPUTS.out.versions) // Combine two channels into one
 
 
 
@@ -65,7 +65,7 @@ workflow SYNVERSE {
         .set { ch_collated_versions } // saves the output channel for later use
 
     emit:
-    loaded_inputs = LOAD_INPUTS_CUSTOM.out.loaded_inputs // channel: /path/to/loaded_inputs.json
+    loaded_inputs = LOAD_INPUTS.out.loaded_inputs // channel: /path/to/loaded_inputs.json
     versions = ch_versions                              // channel: [ path(versions.yml) ]
 }
 
