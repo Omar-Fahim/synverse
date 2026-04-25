@@ -31,11 +31,10 @@ FEATURE_FILE_MAP = {
     "mol_graph":"mol_graph_file",
     "smiles":   "smiles_file",
     "target":   "target_file",
-    "d1hot":    None,          
+      
 }
 
 CELL_LINE_FEATURE_FILE_MAP = {
-    "c1hot": [],
     "genex": ["genex_file"],
     "genex_lincs_1000": ["genex_file", "lincs"],
 }
@@ -75,9 +74,12 @@ def main():
     elif str(synergy_file).strip() == "":
         config_errors.append("Value for 'synergy_file' is empty")
 
-    input_files_paths = {}
-    if not config_errors:
-        input_files_paths["synergy_file"] = resolve_path(Path(input_dir), str(synergy_file))
+   
+    if config_errors:
+        raise ValueError("\n".join(config_errors))
+
+    input_files_paths = {} 
+    input_files_paths["synergy_file"] = resolve_path(Path(input_dir), str(synergy_file))
 
 # Validate that all active features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_key in FEATURE_FILE_MAP.items():
@@ -94,13 +96,18 @@ def main():
                 config_errors.append(f"Value for '{file_key}' is empty")
                 continue
 
-            input_files_paths[file_key] = resolve_path(Path(input_dir), str(input_files.get(file_key))) 
+           
+            resolved_path = resolve_path(Path(input_dir), str(input_files.get(file_key)))
+            if not Path(resolved_path).exists():
+                config_errors.append(f"File for '{file_key}' does not exist: {resolved_path}")
+            else:
+                input_files_paths[file_key] = resolved_path
 
-    if file_missing:
-        parts.append("Missing input files on disk:")
-        parts.extend(file_missing)
-        raise FileNotFoundError("\n".join(parts))
+    
+    
 
+    if config_errors:
+        raise ValueError("\n".join(config_errors))
 
     
     active_cell_line_feature_names  = [f["name"] for f in config.get("cell_line_features", [])]
@@ -112,15 +119,24 @@ def main():
                     config_errors.append(f"Feature '{feature}' is active but has no corresponding file key '{file_key}' in the config")
                     continue
 
-                if not isinstance(input_files.get(file_key), (str, os.PathLike)):
-                    raise TypeError(f"Value for '{file_key}' must be a path string")
-
                 if str(input_files.get(file_key)).strip() == "":
                     config_errors.append(f"Value for '{file_key}' is empty")
                     continue
+                    
+                if not isinstance(input_files.get(file_key), (str, os.PathLike)):
+                    raise TypeError(f"Value for '{file_key}' must be a path string")
 
-                input_files_paths[file_key] = resolve_path(Path(input_dir), str(input_files.get(file_key)))
+                
 
+               resolved_path = resolve_path(Path(input_dir), str(input_files.get(file_key)))
+               if not Path(resolved_path).exists():
+                    config_errors.append(f"File for '{file_key}' does not exist: {resolved_path}")
+               else:
+                    input_files_paths[file_key] = resolved_path
+
+    if config_errors:
+        raise ValueError("\n".join(config_errors))
+        
     manifest = {
         "config":          str(config_path),
         "input_dir":       input_dir,
