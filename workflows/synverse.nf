@@ -3,12 +3,8 @@
     IMPORT MODULES / SUBWORKFLOWS / FUNCTIONS
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { FASTQC                 } from '../modules/nf-core/fastqc/main'
-include { MULTIQC                } from '../modules/nf-core/multiqc/main'
-include { paramsSummaryMap       } from 'plugin/nf-schema'
-include { paramsSummaryMultiqc   } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline'
-include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_synverse_pipeline'
+include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline' //Takes version info and converts it into structured YAML
+include { LOAD_INPUTS_CUSTOM     } from '../subworkflows/local/load_inputs_custom'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -19,93 +15,58 @@ include { methodsDescriptionText } from '../subworkflows/local/utils_nfcore_synv
 workflow SYNVERSE {
 
     take:
-    ch_samplesheet // channel: samplesheet read in from --input
+    synverse_config // channel: path to the SynVerse YAML config
+
     main:
 
-    ch_versions = channel.empty()
-    ch_multiqc_files = channel.empty()
-    //
-    // MODULE: Run FastQC
-    //
-    FASTQC (
-        ch_samplesheet
-    )
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]})
-    ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    ch_versions = channel.empty() // Here I intialise an empty channel to collect software versions .
 
-    //
-    // Collate and save software versions
-    //
-    def topic_versions = Channel.topic("versions")
-        .distinct()
-        .branch { entry ->
+    LOAD_INPUTS_CUSTOM(
+        synverse_config
+    )
+    ch_versions = ch_versions.mix(LOAD_INPUTS_CUSTOM.out.versions) // Combine two channels into one
+
+
+
+// Same from Judith's code for collacting and saving software versions
+    
+    def topic_versions = Channel.topic("versions") // Collects all messages published under topic "versions"
+        .distinct() // no duplicate versions
+        .branch { entry -> // Each entry becomes either version file or version tuple
             versions_file: entry instanceof Path
             versions_tuple: true
         }
 
-    def topic_versions_string = topic_versions.versions_tuple
+    def topic_versions_string = topic_versions.versions_tuple // Extracts version tuples (process, tool, version).
         .map { process, tool, version ->
-            [ process[process.lastIndexOf(':')+1..-1], "  ${tool}: ${version}" ]
+            [ process[process.lastIndexOf(':') + 1..-1], "  ${tool}: ${version}" ] // Extract the process name and write in the format tool:version
         }
-        .groupTuple(by:0)
+        .groupTuple(by: 0) // all tools and versions for each process are grouped together
         .map { process, tool_versions ->
             tool_versions.unique().sort()
             "${process}:\n${tool_versions.join('\n')}"
-        }
+        }  
+        /* final Format will be like:
+            process1:
+              tool1: version
+              tool2: version
+            process2:
+              tool3: version
+        */
 
     softwareVersionsToYAML(ch_versions.mix(topic_versions.versions_file))
         .mix(topic_versions_string)
         .collectFile(
             storeDir: "${params.outdir}/pipeline_info",
-            name: 'nf_core_'  +  'synverse_software_'  + 'mqc_'  + 'versions.yml',
+            name: 'nf_core_' + 'synverse_software_' + 'versions.yml',
             sort: true,
-            newLine: true
-        ).set { ch_collated_versions }
-
-
-    //
-    // MODULE: MultiQC
-    //
-    ch_multiqc_config        = channel.fromPath(
-        "$projectDir/assets/multiqc_config.yml", checkIfExists: true)
-    ch_multiqc_custom_config = params.multiqc_config ?
-        channel.fromPath(params.multiqc_config, checkIfExists: true) :
-        channel.empty()
-    ch_multiqc_logo          = params.multiqc_logo ?
-        channel.fromPath(params.multiqc_logo, checkIfExists: true) :
-        channel.empty()
-
-    summary_params      = paramsSummaryMap(
-        workflow, parameters_schema: "nextflow_schema.json")
-    ch_workflow_summary = channel.value(paramsSummaryMultiqc(summary_params))
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    ch_multiqc_custom_methods_description = params.multiqc_methods_description ?
-        file(params.multiqc_methods_description, checkIfExists: true) :
-        file("$projectDir/assets/methods_description_template.yml", checkIfExists: true)
-    ch_methods_description                = channel.value(
-        methodsDescriptionText(ch_multiqc_custom_methods_description))
-
-    ch_multiqc_files = ch_multiqc_files.mix(ch_collated_versions)
-    ch_multiqc_files = ch_multiqc_files.mix(
-        ch_methods_description.collectFile(
-            name: 'methods_description_mqc.yaml',
-            sort: true
+            newLine: true // Collects all version info into one file
         )
-    )
+        .set { ch_collated_versions } // saves the output channel for later use
 
-    MULTIQC (
-        ch_multiqc_files.collect(),
-        ch_multiqc_config.toList(),
-        ch_multiqc_custom_config.toList(),
-        ch_multiqc_logo.toList(),
-        [],
-        []
-    )
-
-    emit:multiqc_report = MULTIQC.out.report.toList() // channel: /path/to/multiqc_report.html
-    versions       = ch_versions                 // channel: [ path(versions.yml) ]
-
+    emit:
+    loaded_inputs = LOAD_INPUTS_CUSTOM.out.loaded_inputs // channel: /path/to/loaded_inputs.json
+    versions = ch_versions                              // channel: [ path(versions.yml) ]
 }
 
 /*
