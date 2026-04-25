@@ -16,11 +16,11 @@ def parse_args():
 
 
 
-def resolve_path(base_dir: Path, value: str) -> str: # Takes a base directory and a relative path value, resolves it to an absolute path, and returns it as a string.
+def resolve_path(base_dir: Path, value: str) -> Path: # Takes a base directory and a relative path value, resolves it to an absolute path, and returns it as a Path.
     path = Path(value)
     if not path.is_absolute():
         path = base_dir / path
-    return str(path.resolve()) # .Resolve(): Resolves any symbolic links and returns the absolute path as a string.
+    return path.resolve() # .Resolve(): Resolves any symbolic links and returns the absolute path.
 
 
 
@@ -57,8 +57,8 @@ def main():
     input_settings = config["input_settings"] # Retrieves the "input_settings" section from the config dictionary.
     output_settings = config["output_settings"] # Retrieves the "output_settings" section from the config dictionary.
 
-    input_dir = resolve_path(repo_root, input_settings["input_dir"]) # Resolves the input directory path relative to the repository root and converts it to an absolute path.
-    output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute path.
+    input_dir = resolve_path(repo_root, input_settings["input_dir"]) # Resolves the input directory path relative to the repository root and converts it to an absolute Path.
+    output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute Path.
 
     input_files  = input_settings["input_files"]
     active_drug_feature_names  = [f["name"] for f in config.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
@@ -78,8 +78,8 @@ def main():
     if config_errors:
         raise ValueError("\n".join(config_errors))
 
-    input_files_paths = {} 
-    input_files_paths["synergy_file"] = resolve_path(Path(input_dir), str(synergy_file))
+    input_files_paths = {}
+    input_files_paths["synergy_file"] = str(resolve_path(input_dir, str(synergy_file)))
 
 # Validate that all active features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_key in FEATURE_FILE_MAP.items():
@@ -97,11 +97,11 @@ def main():
                 continue
 
            
-            resolved_path = resolve_path(Path(input_dir), str(input_files.get(file_key)))
-            if not Path(resolved_path).exists():
+            resolved_path = resolve_path(input_dir, str(input_files.get(file_key)))
+            if not resolved_path.exists():
                 config_errors.append(f"File for '{file_key}' does not exist: {resolved_path}")
             else:
-                input_files_paths[file_key] = resolved_path
+                input_files_paths[file_key] = str(resolved_path)
 
     
     
@@ -128,19 +128,19 @@ def main():
 
                 
 
-               resolved_path = resolve_path(Path(input_dir), str(input_files.get(file_key)))
-               if not Path(resolved_path).exists():
+                resolved_path = resolve_path(input_dir, str(input_files.get(file_key)))
+                if not resolved_path.exists():
                     config_errors.append(f"File for '{file_key}' does not exist: {resolved_path}")
-               else:
-                    input_files_paths[file_key] = resolved_path
+                else:
+                    input_files_paths[file_key] = str(resolved_path)
 
     if config_errors:
         raise ValueError("\n".join(config_errors))
         
     manifest = {
         "config":          str(config_path),
-        "input_dir":       input_dir,
-        "output_dir":      output_dir,
+        "input_dir":       str(input_dir),
+        "output_dir":      str(output_dir),
         "score_name":      input_settings["score_name"],
         "active_features": {
             "drug": active_drug_feature_names,
