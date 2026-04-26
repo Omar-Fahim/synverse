@@ -43,18 +43,19 @@ params.fasta = getGenomeAttribute('fasta')
 workflow NFCORE_SYNVERSE {
 
     take:
-    samplesheet // channel: samplesheet read in from --input
+    synverse_config
 
     main:
 
-    //
-    // WORKFLOW: Run pipeline
-    //
-    SYNVERSE (
-        samplesheet
+    SYNVERSE(
+        synverse_config
     )
+
     emit:
-    multiqc_report = SYNVERSE.out.multiqc_report // channel: /path/to/multiqc_report.html
+    loaded_inputs = SYNVERSE.out.loaded_inputs
+    synergy_df = SYNVERSE.out.synergy_df
+    drug_features = SYNVERSE.out.drug_features
+    cell_features = SYNVERSE.out.cell_features
 }
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -84,20 +85,23 @@ workflow {
     // WORKFLOW: Run main workflow
     //
     NFCORE_SYNVERSE (
-        PIPELINE_INITIALISATION.out.samplesheet
+        
+        PIPELINE_INITIALISATION.out.synverse_config
+
     )
     //
     // SUBWORKFLOW: Run completion tasks
     //
-    PIPELINE_COMPLETION (
+    PIPELINE_COMPLETION(
         params.email,
         params.email_on_fail,
         params.plaintext_email,
         params.outdir,
         params.monochrome_logs,
         params.hook_url,
-        NFCORE_SYNVERSE.out.multiqc_report
+        Channel.empty()
     )
+
 }
 
 /*
