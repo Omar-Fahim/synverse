@@ -6,6 +6,9 @@ import pandas as pd
 from parse_config import parse_config
 import torch
 import numpy as np
+from preprocessing.rwr_runner import *
+from rdkit import Chem
+
 def parse_args():
     parser = argparse.ArgumentParser(description="Load and validate SynVerse inputs.") # Creates a command line argument parser object.
     parser.add_argument("--manifest", required=True, help="Path to SynVerse YAML Manifest.") # Adds a required command line argument for the config file path.
