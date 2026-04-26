@@ -3,7 +3,7 @@ import argparse
 import json
 import os
 from pathlib import Path
-
+from parse_config import parse_config
 import yaml
 
 
@@ -146,17 +146,18 @@ def main():
 
     if config_errors:
         raise ValueError("\n".join(config_errors))
-        
+    
+    parsed_config = parse_config(config) 
+   
+
     manifest = {
-        "config":          str(config_path),
-        "input_dir":       str(input_dir),
-        "output_dir":      str(output_dir),
-        "score_name":      input_settings["score_name"],
+        "config_path":        str(config_path),
+        "config_map":         config,
         "active_features": {
             "drug": active_drug_feature_names,
             "cell_line": active_cell_line_feature_names,
-        },
-        "input_files_abs_paths": input_files_paths,
+        },     
+
     }
 
     Path("loaded_inputs.json").write_text( # Writes the manifest dictionary as a JSON string to a file named "loaded_inputs.json" in the current working directory.
