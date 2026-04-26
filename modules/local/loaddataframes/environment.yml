@@ -3,8 +3,20 @@
 channels:
   - conda-forge
   - bioconda
+  - pytorch
+  - pyg
+
 dependencies:
   # TODO nf-core: List required Conda package(s).
   #               Software MUST be pinned to channel (i.e. "bioconda"), version (i.e. "1.10").
   #               For Conda, the build (i.e. "h9402c20_2") must be EXCLUDED to support installation on different operating systems.
-  - "YOUR-TOOL-HERE"
+  - python=3.11
+  - pandas
+  - numpy
+  - pyyaml
+  - pytorch
+  - rdkit
+  - pyg
+  - scipy
+  - scikit-learn
+  - transformers

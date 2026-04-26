@@ -17,7 +17,7 @@
 
 process LOADDATAFRAMES {
     tag "${manifest.baseName}"
-    label 'process_singley'
+    label 'process_single'
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"
@@ -25,12 +25,7 @@ process LOADDATAFRAMES {
     'docker://python:3.11' :
     'python:3.11' }"
 
-    input:// TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
-    //               MUST be provided as an input via a Groovy Map called "meta".
-    //               This information may not be required in some instances e.g. indexing reference genome files:
-    //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
-    // TODO nf-core: Where applicable please provide/convert compressed files as input/output
-    //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
+    input:
     path manifest
 
     output:
@@ -44,7 +39,7 @@ process LOADDATAFRAMES {
     script:
     
     """
-    synverse_load_dataframes.py --manifest ${manifest}
+    python synverse_load_dataframes.py --manifest ${manifest}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

@@ -1,11 +1,10 @@
-
+#!/usr/bin/env python
 import argparse
 import json
 from pathlib import Path
 from parse_config import parse_config
-
-
-
+import pickle 
+import os
 
 #Drug Preprocess imports
 from rdkit import Chem
@@ -14,7 +13,7 @@ from models.model_utils import *
 from preprocessing.pretrain.embedding_generator import get_pretrained_embedding
 import torch
 from torch_geometric import data as DATA
-from .preprocess_utils import adjacency_list_to_edges
+from preprocess_utils import adjacency_list_to_edges
 
 
 #Cell line preprocess imports
@@ -288,9 +287,13 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     synergy_df, dfeat_dict, cfeat_dict = load_dataframes(params, inputs, device)
-    print(dfeat_dict)
-    print(cfeat_dict)
-    return synergy_df, dfeat_dict, cfeat_dict
+    synergy_df.to_csv("synergy_df.tsv", sep="\t", index=False)
+
+    with open("drug_features.pkl", "wb") as f:
+        pickle.dump(dfeat_dict, f)
+
+    with open("cell_features.pkl", "wb") as f:
+        pickle.dump(cfeat_dict, f)
                                
 
 if __name__ == "__main__":

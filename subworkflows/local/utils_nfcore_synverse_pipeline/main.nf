@@ -166,7 +166,7 @@ workflow PIPELINE_COMPLETION {
 //
 // Check and validate pipeline parameters
 //
-def validateInputParameters() {
+def validateInputParameters(input) {
       if (!input) {
         error("Please provide a SynVerse YAML config with --input.")
     }
