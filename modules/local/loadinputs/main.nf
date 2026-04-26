@@ -37,8 +37,8 @@ process LOADINPUTS {
 
     script:
     """
-    synverse_load_inputs.py \\
-        --config ${synverse_config}
+    python ${projectDir}/bin/synverse_load_inputs.py \
+    --config ${synverse_config}
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

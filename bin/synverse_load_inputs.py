@@ -41,11 +41,14 @@ CELL_LINE_FEATURE_FILE_MAP = {
 
 def main():
     args = parse_args() # Parses the command line arguments.
-    repo_root = Path(__file__).resolve().parents[1]
-    config_path = Path(args.config)
-    if not config_path.is_absolute():
-        config_path = repo_root / config_path
-    config_path = config_path.resolve()
+    print(f"Parsed arguments: {args}") # Prints the parsed arguments for debugging purposes.
+    # repo_root = Path(__file__).resolve().parents[1]
+    # config_path = Path(args.config)
+    # if not config_path.is_absolute():
+    #     config_path = repo_root / config_path
+    # config_path = config_path.resolve()
+    # print(f"Resolved config path: {config_path}")
+    config_path = Path(args.config).resolve()
 
     if not config_path.exists():
         raise FileNotFoundError(f"Config file not found: {config_path}")

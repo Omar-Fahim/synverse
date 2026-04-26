@@ -39,8 +39,8 @@ process LOADDATAFRAMES {
     script:
     
     """
-    python synverse_load_dataframes.py --manifest ${manifest}
-
+    python ${projectDir}/bin/synverse_load_dataframes.py \
+    --manifest ${manifest}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')

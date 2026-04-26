@@ -109,7 +109,7 @@ workflow PIPELINE_INITIALISATION {
     emit:
     synverse_config = ch_synverse_config
     versions = ch_versions
-
+}
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     SUBWORKFLOW FOR PIPELINE COMPLETION

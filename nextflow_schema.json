@@ -16,12 +16,11 @@
                     "type": "string",
                     "format": "file-path",
                     "exists": true,
-                    "schema": "assets/schema_input.json",
-                    "mimetype": "text/csv",
-                    "pattern": "^\\S+\\.csv$",
-                    "description": "Path to comma-separated file containing information about the samples in the experiment.",
-                    "help_text": "You will need to create a design file with information about the samples in your experiment before running the pipeline. Use this parameter to specify its location. It has to be a comma-separated file with 3 columns, and a header row. See [usage docs](https://nf-co.re/synverse/usage#samplesheet-input).",
-                    "fa_icon": "fas fa-file-csv"
+                    "mimetype": "text/yaml",
+                    "pattern": "^\\S+\\.ya?ml$",
+                    "description": "Path to the SynVerse YAML config file.",
+                    "help_text": "Provide the SynVerse configuration file in YAML format using this parameter.",
+                    "fa_icon": "fas fa-file-code"
                 },
                 "outdir": {
                     "type": "string",

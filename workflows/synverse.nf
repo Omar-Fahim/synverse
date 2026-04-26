@@ -4,7 +4,7 @@
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline' //Takes version info and converts it into structured YAML
-include { PREPROCESS_DATA } from '../subworkflows/local/preprocess_data'
+include { PREPROCESS_DATA } from '../subworkflows/local/preprocess_custom'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
