@@ -32,6 +32,7 @@ process LOADDATAFRAMES {
     path 'synergy_df.tsv', emit: synergy_df
     path 'drug_features.pkl', emit: drug_features
     path 'cell_features.pkl', emit: cell_features
+    path 'drug_cell_feat_combs.pkl', emit: drug_cell_feat_combs
     path 'versions.yml', emit: versions
 
   

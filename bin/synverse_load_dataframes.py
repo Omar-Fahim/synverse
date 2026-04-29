@@ -346,12 +346,17 @@ def main():
     synergy_df.to_csv("synergy_df.tsv", sep="\t", index=False)
 
 
+
     with open("drug_features.pkl", "wb") as f:
         pickle.dump(dfeat_dict, f)
 
     with open("cell_features.pkl", "wb") as f:
         pickle.dump(cfeat_dict, f)
                                
+    with open("drug_cell_feat_combs.pkl", "wb") as f:
+        pickle.dump(drug_cell_feat_combs, f)
 
+
+        
 if __name__ == "__main__":
     main()
