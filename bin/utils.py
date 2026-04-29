@@ -241,7 +241,7 @@ def get_index_sorted_feature_matrix(dfeat_mtx_dict, drug_2_idx, cfeat_mtx_dict, 
             cur_dfeat.drop_duplicates(subset=['pid'], inplace=True)
             cur_dfeat.dropna(subset=['idx'], inplace=True)
             cur_dfeat.set_index('idx', inplace=True)
-            cur_dfeat.drop(axis=1, columns=['pid'], inplace=True)
+            cur_dfeat.drop(columns=['pid'], inplace=True) # removed axis =1 from here
             # sort drugs according to index
             cur_dfeat.sort_index(inplace=True)
             assert list(cur_dfeat.index) == list(range(len(cur_dfeat))), print('index not in order.')
@@ -257,7 +257,7 @@ def get_index_sorted_feature_matrix(dfeat_mtx_dict, drug_2_idx, cfeat_mtx_dict, 
         cur_cfeat['idx'] = cur_cfeat['cell_line_name'].astype(str).apply(lambda x: cell_line_2_idx.get(x))
         cur_cfeat.dropna(subset=['idx'], inplace=True)
         cur_cfeat.set_index('idx', inplace=True)
-        cur_cfeat.drop(axis=1, columns=['cell_line_name'], inplace=True)
+        cur_cfeat.drop(columns=['cell_line_name'], inplace=True)
         cur_cfeat.sort_index(inplace=True)
         assert list(cur_cfeat.index) == list(range(len(cur_cfeat))), print(
             'index not in order.')
