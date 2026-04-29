@@ -68,7 +68,7 @@ def main():
 
     config_errors = []
 
-    # validate synergy_file exists in config and is a non-empty path-like string
+    # Here I check that the  synergy_file exists in config and is a non-empty pathstring
     synergy_file= input_files.get("synergy_file")
     if synergy_file is None:
         config_errors.append("'synergy_file' is missing from input_files in the config")
@@ -79,7 +79,7 @@ def main():
 
     input_files_paths = {}
 
-    # only resolve if there are no prior config errors for synergy_file
+  
     if not config_errors:
         resolved_synergy_path = resolve_path(input_dir, str(synergy_file))
         if not resolved_synergy_path.exists():
@@ -91,7 +91,7 @@ def main():
         raise ValueError("\n".join(config_errors))
 
 
-# Validate that all active features have corresponding file keys in the config and that those file paths are valid.
+# Here I validate that all active features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_key in FEATURE_FILE_MAP.items():
   
         if feature in active_drug_feature_names:
@@ -150,7 +150,6 @@ def main():
     if config_errors:
         raise ValueError("\n".join(config_errors))
     
-    parsed_config = parse_config(config) 
    
 
     manifest = {
