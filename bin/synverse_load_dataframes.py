@@ -253,7 +253,57 @@ def landmark_gene_filter(genex_df, lincs_file):
 
 
 
+def get_feature_comb_wrapper(dfeat_dict, cfeat_dict, max_drug_feat, min_drug_feat, max_cell_feat, min_cell_feat):
+    def compute_feature_combination(feature_info, max_size=None, min_size=1):
+        '''
+        Computes valid combinations of features for training a model based on the 'use' values.
+        :param feature_info: a list of dictionaries, where each dictionary has 3 keys: 'name', 'preprocess', and 'use'.
+            'name' is a string representing the feature name.
+            'use' is a list of boolean values indicating whether a feature can be used.
+        :return: a list of lists, where each sublist represents a valid combination of feature names to use.
+        '''
+        # Filter and collect feature names that have at least one 'True' in their 'use' list
+        available_features = [feature_name for feature_name in feature_info if
+                              True in feature_info[feature_name]]  # feature with use=[True, False] or use=[True]
+        must_features = [feature_name for feature_name in feature_info if
+                         False not in feature_info[feature_name]]  # feature with use=[True]
+        optional_features = [feature_name for feature_name in available_features if
+                             feature_name not in must_features]  # feature with use=[True, False]
+        # Initialize an empty list to store all non-empty combinations
+        all_combinations = []
+        # Generate all possible non-empty combinations of available features
+        if max_size is None:  # in this case generate combination of all possible sizes
+            max_size = len(optional_features)
+        else:
+            max_size = (max_size - len(must_features))
+            assert max_size >= 0, print('Please increase max_drug_feat and/or max_cell_feat')
+        for i in range(max_size + 1):
+            all_combinations.extend(combinations(optional_features, i))
+        # Add the must have features. Convert tuples in the list to lists.
+        feat_combinations = [list(combo) + must_features for combo in all_combinations]
+        # filter empty feature combs
+        feat_combinations = [feat_comb for feat_comb in feat_combinations if len(feat_comb) > 0]
+        # make sure that at least one feature comb is being chosen.
+        assert len(feat_combinations) > 0, print('ERROR: no feature is selected to use.')
 
+        # filter feature combs with < min_size
+        feat_combinations = [feat_comb for feat_comb in feat_combinations if len(feat_comb) >= min_size]
+        return feat_combinations
+
+    def find_drug_cell_feat_combs(drug_feat_combs, cell_feat_combs):
+        '''
+            Generates all possible combinations of drug features with cell features.
+        :param drug_feat_combs: a list of lists, each sublist containing names of drug features.
+        :param cell_feat_combs: a list of lists, each sublist containing names of cell features.
+        :return: a list of tuples, where each tuple contains a list from drug_feat_combs and a list from cell_feat_combs.
+
+        '''
+        return list(product(drug_feat_combs, cell_feat_combs))
+
+    drug_feat_combs = compute_feature_combination(dfeat_dict['use'], max_size=max_drug_feat, min_size=min_drug_feat)
+    cell_feat_combs = compute_feature_combination(cfeat_dict['use'], max_size=max_cell_feat, min_size=min_cell_feat)
+    drug_cell_feat_combs = find_drug_cell_feat_combs(drug_feat_combs, cell_feat_combs)
+    return drug_cell_feat_combs
 
 
 
@@ -271,7 +321,13 @@ def load_dataframes(params, inputs, device):
     dfeat_dict, dfeat_names = prepare_drug_features(drug_pids, params, inputs, device)
     cfeat_dict, cfeat_names = prepare_cell_line_features(cell_line_names, params, inputs, device)
 
-    return synergy_df, dfeat_dict, cfeat_dict
+
+    drug_cell_feat_combs = get_feature_comb_wrapper(dfeat_dict, cfeat_dict,
+                            max_drug_feat=params.max_drug_feat,
+                            min_drug_feat = params.min_drug_feat, max_cell_feat=params.max_cell_feat, min_cell_feat = params.min_cell_feat)
+    print('drug_cell_feat_combs:', drug_cell_feat_combs)
+    print('Number of drug-cell feature combinations to try:', len(drug_cell_feat_combs))
+    return synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs
 
 
 def main():
@@ -286,8 +342,9 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    synergy_df, dfeat_dict, cfeat_dict = load_dataframes(params, inputs, device)
+    synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs = load_dataframes(params, inputs, device)
     synergy_df.to_csv("synergy_df.tsv", sep="\t", index=False)
+
 
     with open("drug_features.pkl", "wb") as f:
         pickle.dump(dfeat_dict, f)
