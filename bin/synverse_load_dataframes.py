@@ -76,12 +76,9 @@ def load_dataframes(params, inputs, device):
     # cfeat_dict, cfeat_names = prepare_cell_line_features(cell_line_names, params, inputs, device)
 
     synergy_df, dfeat_dict, cfeat_dict, drug_2_idx, cell_line_2_idx = load_filter_triplets_features(synergy_df, drug_pids, cell_line_names, inputs, params, device)
-    print('Finished loading and filtering triplets and features. Now creating drug-cell feature combinations to try for training the model...')
     drug_cell_feat_combs = get_feature_comb_wrapper(dfeat_dict, cfeat_dict,
                             max_drug_feat=params.max_drug_feat,
                             min_drug_feat = params.min_drug_feat, max_cell_feat=params.max_cell_feat, min_cell_feat = params.min_cell_feat)
-    print('drug_cell_feat_combs:', drug_cell_feat_combs)
-    print('Number of drug-cell feature combinations to try:', len(drug_cell_feat_combs))
     return synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs
 
 
