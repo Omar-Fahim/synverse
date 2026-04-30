@@ -306,7 +306,44 @@ def remove_self_loop_from_splits(test_df, all_train_df, train_idx, val_idx):
     new_val_idx = [old_to_new_index_map[i] for i in val_idx if i in old_to_new_index_map]
 
     return test_df_clean, all_train_df_clean, {0:new_train_idx}, {0:new_val_idx}
-#
+
+
+
+def generalize_data(df, save_dir):
+    '''map drug_pids and cell_line_names to numerical index, here we consider drugs and cell lines
+       for which the user defined required features are available, i.e., if feature='must', then only
+       the drugs and cell lines for which we have all the features available appear here.'''
+
+    #if the data contained in synergy_df does not change across runs, then the serial for each triplet in synergy_df and
+    #the numerical index of drug and cell_lines should also be the same. Hence the sorting.
+    df = df.sort_values(by=['drug_1_pid', 'drug_2_pid', 'cell_line_name']).reset_index(drop=True)
+
+    drug_pids = list(set(df['drug_1_pid']).union(set(df['drug_2_pid'])))
+    drug_pids.sort()
+
+    cell_line_names = list(set(df['cell_line_name']))
+    cell_line_names.sort()
+
+    drug_2_idx = {pid: idx for (idx, pid) in enumerate(drug_pids)}
+    cell_line_2_idx = {name: idx for (idx, name) in enumerate(cell_line_names)}
+
+    df['source'] = df['drug_1_pid'].astype(str).apply(lambda x: drug_2_idx[x])
+    df['target'] = df['drug_2_pid'].astype(str).apply(lambda x: drug_2_idx[x])
+    df['edge_type'] = df['cell_line_name'].astype(str).apply(lambda x: cell_line_2_idx[x])
+
+    drug_2_idx_df = pd.DataFrame({'pid': list(drug_2_idx.keys()), 'idx': list(drug_2_idx.values())})
+    cell_2_idx_df = pd.DataFrame({'cell_line_name': list(cell_line_2_idx.keys()), 'idx': list(cell_line_2_idx.values())})
+
+    os.makedirs(save_dir, exist_ok=True)
+    drug_2_idx_df.to_csv(f'{save_dir}/drug_2_idx.tsv', sep='\t')
+    cell_2_idx_df.to_csv(f'{save_dir}/cell_line_2_idx.tsv', sep='\t')
+
+    return df, drug_2_idx, cell_line_2_idx
+
+
+
+
+
 # def check_remove_loop():
 #     # Step 1: Create dummy all_train_df and test_df
 #     all_train_df = pd.DataFrame({
