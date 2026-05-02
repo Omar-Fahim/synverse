@@ -5,6 +5,7 @@
 */
 include { LOADINPUTS } from '../../../modules/local/loadinputs'
 include { LOADDATAFRAMES } from '../../../modules/local/loaddataframes'
+import groovy.json.JsonSlurper
 
 
 /*
@@ -29,6 +30,34 @@ workflow PREPROCESS_DATA {
         LOADINPUTS.out.loaded_inputs
     )
     ch_versions = ch_versions.mix(LOADDATAFRAMES.out.versions)
+
+    // Here I will create all possible combinations of (runs,splits,seeds).
+
+
+    params_ch = LOADINPUTS.out.params_json
+    .map { file -> new JsonSlurper().parse(file) }
+
+    
+    combinations_ch = params_ch.flatMap { p ->
+
+            def runs = (p.start_run as int)..(p.end_run as int)
+
+            runs.collectMany { run_no ->
+                p.splits.collect { split ->
+
+                    def seed = p.seeds[split.type][run_no]
+
+                    tuple(run_no, split, seed)
+                }
+            }
+        }
+    combinations_ch.view { run_no, split, seed ->
+    "Run: ${run_no} | Type: ${split.type} | Seed: ${seed}"
+}
+ 
+
+    
+
 
     emit:
     loaded_inputs  = LOADINPUTS.out.loaded_inputs

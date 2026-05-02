@@ -41,6 +41,9 @@ class Params:
     input_dir: str
     out_dir: str
     split_dir: str
+    start_run: int
+    end_run: int
+    seeds:  dict[str, list[int]]  
 
 
 def parse_config(config_map):
@@ -91,6 +94,9 @@ def parse_config(config_map):
         input_dir=input_dir,
         out_dir=out_dir,
         split_dir=f"{input_dir}/splits",
+        start_run=input_settings.get('start_run', 1),
+        end_run=input_settings.get('end_run', 1),
+        seeds=input_settings.get('seeds', {})
     )
 
     # Checks
