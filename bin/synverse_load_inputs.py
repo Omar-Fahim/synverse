@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 import argparse
 import json
-import os
+import os, pickle
 from pathlib import Path
 from parse_config import parse_config
 import yaml
@@ -149,23 +149,13 @@ def main():
 
     if config_errors:
         raise ValueError("\n".join(config_errors))
-    
-   
-
-    manifest = {
-        "config_path":        str(config_path),
-        "config_map":         config,
-        "active_features": {
-            "drug": active_drug_feature_names,
-            "cell_line": active_cell_line_feature_names,
-        },     
-
+    inputs, params = parse_config(config)
+    data = {
+        "inputs": inputs,
+        "params": params
     }
-
-    Path("loaded_inputs.json").write_text( # Writes the manifest dictionary as a JSON string to a file named "loaded_inputs.json" in the current working directory.
-        json.dumps(manifest, indent=2), 
-        encoding="utf-8",
-    )
+    with open("loaded_inputs.pkl", "wb") as f:
+        pickle.dump(data, f)
 
 if __name__ == "__main__":
     main()

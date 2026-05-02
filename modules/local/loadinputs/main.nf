@@ -30,7 +30,7 @@ process LOADINPUTS {
 
 
     output:
-    path 'loaded_inputs.json', emit: loaded_inputs
+    path 'loaded_inputs.pkl', emit: loaded_inputs
     path 'versions.yml', emit: versions
 
  

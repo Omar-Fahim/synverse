@@ -16,7 +16,7 @@
 //               list (`[]`) instead of a file can be used to work around this issue.
 
 process LOADDATAFRAMES {
-    tag "${manifest.baseName}"
+    tag "${loaded_inputs.baseName}"
     label 'process_single'
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
@@ -26,7 +26,7 @@ process LOADDATAFRAMES {
     'python:3.13' }"
 
     input:
-    path manifest
+    path loaded_inputs
 
     output:
     path 'synergy_df.tsv', emit: synergy_df
@@ -41,7 +41,7 @@ process LOADDATAFRAMES {
     
     """
     synverse_load_dataframes.py \
-    --manifest ${manifest}
+    --Parsed_config ${loaded_inputs}
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')

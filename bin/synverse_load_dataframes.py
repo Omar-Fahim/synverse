@@ -31,16 +31,16 @@ from split import *
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(description="Load and validate SynVerse inputs.") # Creates a command line argument parser object.
-    parser.add_argument("--manifest", required=True, help="Path to SynVerse YAML Manifest.") # Adds a required command line argument for the config file path.
-    return parser.parse_args() # Parses the command line arguments and returns them as a Namespace object.
+    parser = argparse.ArgumentParser(description="Load DataFrames.")
+    parser.add_argument("--Parsed_config", required=True, help="Path to parsed config file.")
+    return parser.parse_args()
 
 
 
-
-def load_manifest(path):
-    with Path(path).open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+def load_parsed_config(path):
+    with open(Path(path), "rb") as f:
+        data = pickle.load(f)
+    return data['inputs'], data['params']
 
 def load_synergy_file(path,score_name):
     synergy_df = pd.read_csv(
@@ -84,13 +84,8 @@ def load_dataframes(params, inputs, device):
 
 def main():
     args = parse_args()
-    manifest = load_manifest(args.manifest)
-    config_map = manifest.get("config_map")
+    inputs, params = load_parsed_config(args.Parsed_config)
 
-    if config_map is None:
-        raise ValueError("Parsed config not found in manifest.")
-
-    inputs, params = parse_config(config_map)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
