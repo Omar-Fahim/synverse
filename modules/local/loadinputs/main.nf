@@ -31,6 +31,8 @@ process LOADINPUTS {
 
     output:
     path 'loaded_inputs.pkl', emit: loaded_inputs
+    path 'inputs.json',       emit: inputs_json
+    path 'params.json',       emit: params_json
     path 'versions.yml', emit: versions
 
  

@@ -32,6 +32,8 @@ workflow PREPROCESS_DATA {
 
     emit:
     loaded_inputs  = LOADINPUTS.out.loaded_inputs
+    inputs_json    = LOADINPUTS.out.inputs_json
+    params_json    = LOADINPUTS.out.params_json
     synergy_df     = LOADDATAFRAMES.out.synergy_df
     drug_features  = LOADDATAFRAMES.out.drug_features
     cell_features  = LOADDATAFRAMES.out.cell_features

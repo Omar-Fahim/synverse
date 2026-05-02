@@ -154,8 +154,15 @@ def main():
         "inputs": inputs,
         "params": params
     }
+
     with open("loaded_inputs.pkl", "wb") as f:
         pickle.dump(data, f)
+
+    with open("inputs.json", "w") as f:
+        json.dump(vars(inputs), f, indent=2)
+
+    with open("params.json", "w") as f:
+        json.dump(vars(params), f, indent=2)
 
 if __name__ == "__main__":
     main()
