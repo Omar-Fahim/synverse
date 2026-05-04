@@ -35,22 +35,41 @@ workflow PREPROCESS_DATA {
 
 
     params_ch = LOADINPUTS.out.params_json
-    .map { file -> new JsonSlurper().parse(file) }
+    .map { file -> new JsonSlurper().parse(file) } // This will convert the Json file into a Groovy Object
 
     
-    combinations_ch = params_ch.flatMap { p ->
+    combinations_ch = params_ch.flatMap { p -> // for each element in the channel, we will generate multiple outputs
 
-            def runs = (p.start_run as int)..(p.end_run as int)
+            def runs = (p.start_run as int)..(p.end_run as int) // This will create a range of runs from start_run to end_run
 
-            runs.collectMany { run_no ->
-                p.splits.collect { split ->
+            runs.collectMany { run_no -> // Loop over each run number
+                p.splits.collect { split -> // for each run number, loop over all splits 
 
                     def seed = p.seeds[split.type][run_no]
 
                     tuple(run_no, split, seed)
-                }
+                }  
             }
         }
+                    /* 
+                        Run Output 
+                        [
+                            (1, splitA, seed1A),
+                            (1, splitB, seed1B),
+                            (2, splitA, seed2A),
+                            (2, splitB, seed2B)
+                        ]
+
+                    */
+                    
+                    
+                    
+                    /*  
+                    Split Output
+                        [
+                        (run_no, splitA, seed),
+                        (run_no, splitB, seed)
+                        ] */
     combinations_ch.view { run_no, split, seed ->
     "Run: ${run_no} | Type: ${split.type} | Seed: ${seed}"
 }
