@@ -4,6 +4,7 @@ import argparse, os, pickle
 import copy
 from utils import wrapper_test_train_val, remove_self_loop_from_splits
 import json
+from pathlib import Path
 
 #Read run_no,split_type,Seed from command line arguments
 def parse_args():
@@ -27,9 +28,7 @@ def main():
     inputs, params = load_parsed_config(args.parsed_config_path)
 
     # Load the dataset
-    synergy_df = pd.read_csv(args.dataset_path)
-
-    
+    synergy_df = pd.read_csv(args.dataset_path, sep="\t")
     split = json.loads(args.split)
 
     split_type, test_frac, val_frac =split['type'], split['test_frac'], split['val_frac']
@@ -51,6 +50,14 @@ def main():
     train_path = os.path.join(out_dir, "train.pkl")
     train_idx_path = os.path.join(out_dir, "train_idx.pkl")
     val_idx_path = os.path.join(out_dir, "val_idx.pkl")
+    print(f"Saving test set to: {test_path}")
+    
+    # Print for testing
+    print(f"Test set size: {len(test_df)}")
+    print(f"Train set size: {len(all_train_df)}")
+    print(f"Train indices : {train_idx.get(0)}")
+    print(f"Validation indices : {val_idx.get(0)}")
+    
 
     with open(test_path, "wb") as f:
         pickle.dump(test_df, f)
@@ -59,12 +66,14 @@ def main():
         pickle.dump(all_train_df, f)
 
     with open(train_idx_path, "wb") as f:
-    pickle.dump(train_idx, f)
-    
+        pickle.dump(train_idx, f)
+
     with open(val_idx_path, "wb") as f:
         pickle.dump(val_idx, f)
 
-    
+
+if __name__ == "__main__":
+    main()
     
 
 
