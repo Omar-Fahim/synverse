@@ -70,9 +70,7 @@ workflow PREPROCESS_DATA {
                         (run_no, splitA, seed),
                         (run_no, splitB, seed)
                         ] */
-    combinations_ch.view { run_no, split, seed ->
-    "Run: ${run_no} | Type: ${split.type} | Seed: ${seed}"
-}
+
  
 
     
