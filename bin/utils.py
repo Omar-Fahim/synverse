@@ -8,7 +8,7 @@ import pandas as pd
 from itertools import combinations
 from itertools import product
 import copy
-
+from graph_split import *
 split_type_map = {'random': 'random', 'leave_comb': 'edge', 'leave_drug':'node', 'leave_cell_line': 'edge_type'}
 
 def load_yaml_file(filepath):
