@@ -12,7 +12,11 @@ dependencies:
   - pandas
   - pyyaml
   - scikit-learn
+  - rdkit
+  - transformers
   - pip:
-    - torch
+      - torch
+      - torch_geometric>=2.7.0
+     
   
 

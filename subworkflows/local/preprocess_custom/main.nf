@@ -90,9 +90,17 @@ workflow PREPROCESS_DATA {
         .map { run_no, split, seed, synergy_df, loaded_inputs ->
             tuple(run_no, split, seed, synergy_df, loaded_inputs)
         }
+        .combine(LOADDATAFRAMES.out.drug_features)
+        .map { run_no, split, seed, synergy_df, loaded_inputs, drug_features ->
+            tuple(run_no, split, seed, synergy_df, loaded_inputs, drug_features)
+        }
+        .combine(LOADDATAFRAMES.out.cell_features)
+        .map { run_no, split, seed, synergy_df, loaded_inputs, drug_features, cell_features ->
+            tuple(run_no, split, seed, synergy_df, loaded_inputs, drug_features, cell_features)
+        }
     )
 
-    split_jobs = split_jobs.filter { run_no, split, seed, dataset, params ->
+    split_jobs = split_jobs.filter { run_no, split, seed, dataset, params, drug_features, cell_features ->
         seed != null
     }
     SPLITDATA(
