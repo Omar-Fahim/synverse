@@ -5,7 +5,9 @@
 */
 include { LOADINPUTS } from '../../../modules/local/loadinputs'
 include { LOADDATAFRAMES } from '../../../modules/local/loaddataframes'
+include { SPLITDATA } from '../../../modules/local/splitdata'
 import groovy.json.JsonSlurper
+
 
 
 /*
@@ -34,10 +36,11 @@ workflow PREPROCESS_DATA {
     // Here I will create all possible combinations of (runs,splits,seeds).
 
 
-    params_ch = LOADINPUTS.out.params_json
-    .map { file -> new JsonSlurper().parse(file) } // This will convert the Json file into a Groovy Object
+    params_ch = LOADINPUTS.out.params_json // is a channel that emits json file paths
+    .map { file -> new JsonSlurper().parse(file) } // This will read the Json file and convert it into a Groovy Object
 
-    
+    // Here, the conversion of the params_json to groovy object so that nextflow treat as object not a single string
+
     combinations_ch = params_ch.flatMap { p -> // for each element in the channel, we will generate multiple outputs
 
             def runs = (p.start_run as int)..(p.end_run as int) // This will create a range of runs from start_run to end_run
@@ -51,6 +54,8 @@ workflow PREPROCESS_DATA {
                 }  
             }
         }
+
+        // A groovy object is just an instance of a class - the same core idea as in java - this is for me 
                     /* 
                         Run Output 
                         [
@@ -71,8 +76,29 @@ workflow PREPROCESS_DATA {
                         (run_no, splitB, seed)
                         ] */
 
- 
+    // PRINT COMBINATIONS_CH
+   split_jobs = (
+    combinations_ch
+        .map { run_no, split, seed ->
+            tuple(run_no, split, seed) // As we have converted the paramters json file to a groovy object, split was converted to a groovy map
+        } 
+        .combine(LOADDATAFRAMES.out.synergy_df)
+        .map { run_no, split, seed, synergy_df ->
+            tuple(run_no, split, seed, synergy_df)
+        }
+        .combine(LOADINPUTS.out.loaded_inputs)
+        .map { run_no, split, seed, synergy_df, loaded_inputs ->
+            tuple(run_no, split, seed, synergy_df, loaded_inputs)
+        }
+    )
 
+    split_jobs = split_jobs.filter { run_no, split, seed, dataset, params ->
+        seed != null
+    }
+    SPLITDATA(
+        split_jobs
+    )
+    ch_versions = ch_versions.mix(SPLITDATA.out.versions)
     
 
 
@@ -83,5 +109,9 @@ workflow PREPROCESS_DATA {
     synergy_df     = LOADDATAFRAMES.out.synergy_df
     drug_features  = LOADDATAFRAMES.out.drug_features
     cell_features  = LOADDATAFRAMES.out.cell_features
+    test            = SPLITDATA.out.test
+    train           = SPLITDATA.out.train
+    train_idx       = SPLITDATA.out.train_idx
+    val_idx         = SPLITDATA.out.val_idx
     versions       = ch_versions
 }
