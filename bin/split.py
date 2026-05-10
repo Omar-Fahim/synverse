@@ -5,7 +5,9 @@ import copy
 from utils import wrapper_test_train_val, remove_self_loop_from_splits
 import json
 from pathlib import Path
-
+from preprocessing.preprocess import post_split_processing
+from utils import get_feat_prefix
+import torch
 #Read run_no,split_type,Seed from command line arguments
 def parse_args():
     parser = argparse.ArgumentParser(description="Split dataset into train, validation, and test sets.")
@@ -14,9 +16,16 @@ def parse_args():
     parser.add_argument("--seed", type=int, required=True, help="Random seed for reproducibility.")
     parser.add_argument("--dataset_path", type=str, required=True, help="Path to the input dataset file (CSV).")
     parser.add_argument("--parsed_config_path", type=str, required=True, help="Path to the parsed config file (pickle).")
+    parser.add_argument("--dfeat_dict", type=str, required=True, help="Path to the parsed drug features file (pickle).")
+    parser.add_argument("--cfeat_dict", type=str, required=True, help="Path to the parsed cell line features file (pickle).")
+
     return parser.parse_args()
 
-
+def load_dict_from_pickle(path):
+    with open(Path(path), "rb") as f:
+        data = pickle.load(f)
+    return data
+    
 def load_parsed_config(path):
     with open(Path(path), "rb") as f:
         data = pickle.load(f)
@@ -48,6 +57,22 @@ def main():
     # Select only the relevant columns for the output
     all_train_df = all_train_df[['source', 'target','edge_type', params.score_name]]
 
+    # load feature dictionaries from the pickled files passed as arguments
+    with open(args.dfeat_dict, 'rb') as fh:
+        dfeat_dict = pickle.load(fh)
+    with open(args.cfeat_dict, 'rb') as fh:
+        cfeat_dict = pickle.load(fh)
+
+    # expose run_no, seed and device variables used later
+    
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    feat_str = get_feat_prefix(dfeat_dict, cfeat_dict)
+    split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{test_frac}_{val_frac}/run_{args.run_no}_{args.seed}/"
+    split_file_path = params.split_dir + split_info_str
+    cur_dfeat_dict, cur_cfeat_dict = post_split_processing(dfeat_dict, cfeat_dict, all_train_df, params, split_info_str, device)
+
+
     # save the splits in files (run,split_type,seed)
 
     # out_dir = os.path.join("results", f"run_{args.run_no}", f"split_{split_type}", f"seed_{args.seed}")
@@ -59,10 +84,10 @@ def main():
     # print(f"Saving test set to: {test_path}")
     
     # Print for testing
-    print(f"Test set size: {len(test_df)}")
-    print(f"Train set size: {len(all_train_df)}")
-    print(f"Train indices : {train_idx.get(0)}")
-    print(f"Validation indices : {val_idx.get(0)}")
+    # print(f"Test set size: {len(test_df)}")
+    # print(f"Train set size: {len(all_train_df)}")
+    # print(f"Train indices : {train_idx.get(0)}")
+    # print(f"Validation indices : {val_idx.get(0)}")
     
 
     with open('test.pkl', "wb") as f:
@@ -76,6 +101,10 @@ def main():
 
     with open('val_idx.pkl', "wb") as f:
         pickle.dump(val_idx, f)
+    with open('cur_dfeat_dict.pkl', "wb") as f:
+        pickle.dump(cur_dfeat_dict, f)
+    with open('cur_cfeat_dict.pkl', "wb") as f:
+        pickle.dump(cur_cfeat_dict, f)
 
 
 if __name__ == "__main__":
