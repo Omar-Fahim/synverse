@@ -5,7 +5,6 @@ from preprocessing.autoencoder import autoencoder_runner
 from preprocessing.preprocess_utils import *
 
 from utils import *
-from split import *
 import pandas as pd
 
 def load_filter_triplets_features(synergy_df, drug_pids, cell_line_names,inputs, params,device, feat_filt=True, abundance_based_filt=True):
@@ -58,14 +57,14 @@ def post_split_processing(dfeat_dict, cfeat_dict, all_train_df, params, split_in
                                                                         train_drug_idx,
                                                                         hidden_dim_options=params.autoencoder_dims,
                                                                         epoch=500,
-                                                                        file_prefix=f'{params.input_dir}/drug/AE/{split_info_str}/',
+                                                                        file_prefix=f'drug/AE/{split_info_str}/',
                                                                         device=device, force_run=False)
     cur_cfeat_dict['value'], cur_cfeat_dict['dim'] = autoencoder_runner(cur_cfeat_dict['value'], cur_cfeat_dict['dim'],
                                                                         cur_cfeat_dict['compress'],
                                                                         train_cell_idx,
                                                                         hidden_dim_options=params.autoencoder_dims,
                                                                         epoch=500,
-                                                                        file_prefix=f'{params.input_dir}/cell-line/AE/{split_info_str}/',
+                                                                        file_prefix=f'cell-line/AE/{split_info_str}/',
                                                                         device=device, force_run=False)
 
     # Normalize data based on training data. Use the computed mean, std from training data to normalize test data.
