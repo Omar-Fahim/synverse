@@ -23,7 +23,13 @@ def load_parsed_config(path):
     return data['inputs'], data['params']
 
 def main():
+
     args = parse_args()
+    
+    print(f" parsed_config_path: {args.parsed_config_path}")
+
+
+    
 
     inputs, params = load_parsed_config(args.parsed_config_path)
 
@@ -44,13 +50,13 @@ def main():
 
     # save the splits in files (run,split_type,seed)
 
-    out_dir = os.path.join("results", f"run_{args.run_no}", f"split_{split_type}", f"seed_{args.seed}")
-    os.makedirs(out_dir, exist_ok=True)
-    test_path = os.path.join(out_dir, "test.pkl")
-    train_path = os.path.join(out_dir, "train.pkl")
-    train_idx_path = os.path.join(out_dir, "train_idx.pkl")
-    val_idx_path = os.path.join(out_dir, "val_idx.pkl")
-    print(f"Saving test set to: {test_path}")
+    # out_dir = os.path.join("results", f"run_{args.run_no}", f"split_{split_type}", f"seed_{args.seed}")
+    # os.makedirs(out_dir, exist_ok=True)
+    # test_path = os.path.join(out_dir, "test.pkl")
+    # train_path = os.path.join(out_dir, "train.pkl")
+    # train_idx_path = os.path.join(out_dir, "train_idx.pkl")
+    # val_idx_path = os.path.join(out_dir, "val_idx.pkl")
+    # print(f"Saving test set to: {test_path}")
     
     # Print for testing
     print(f"Test set size: {len(test_df)}")
@@ -59,16 +65,16 @@ def main():
     print(f"Validation indices : {val_idx.get(0)}")
     
 
-    with open(test_path, "wb") as f:
+    with open('test.pkl', "wb") as f:
         pickle.dump(test_df, f)
 
-    with open(train_path, "wb") as f:
+    with open('train.pkl', "wb") as f:
         pickle.dump(all_train_df, f)
 
-    with open(train_idx_path, "wb") as f:
+    with open('train_idx.pkl', "wb") as f:
         pickle.dump(train_idx, f)
 
-    with open(val_idx_path, "wb") as f:
+    with open('val_idx.pkl', "wb") as f:
         pickle.dump(val_idx, f)
 
 

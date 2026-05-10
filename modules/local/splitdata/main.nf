@@ -14,40 +14,30 @@
 //                 bwa mem | samtools view -B -T ref.fasta
 // TODO nf-core: Optional inputs are not currently supported by Nextflow. However, using an empty
 //               list (`[]`) instead of a file can be used to work around this issue.
+import groovy.json.JsonOutput
 
 process SPLITDATA {
-    tag '$bam'
-    label 'process_single'
-
+    tag { "run_${run_no}_split_${split.type}_seed_${seed}" }
+    label 'process_low'
+    
+    publishDir path: { "${params.outdir}/run_${run_no}_split_${split.type}_seed_${seed}" }, mode: params.publish_dir_mode, saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"
-    container "${ workflow.containerEngine in ['singularity', 'apptainer'] && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/YOUR-TOOL-HERE':
-        'quay.io/biocontainers/YOUR-TOOL-HERE' }"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+    'docker://python:3.13':
+    'python:3.13' }"
 
-    input:// TODO nf-core: Where applicable all sample-specific information e.g. "id", "single_end", "read_group"
-    //               MUST be provided as an input via a Groovy Map called "meta".
-    //               This information may not be required in some instances e.g. indexing reference genome files:
-    //               https://github.com/nf-core/modules/blob/master/modules/nf-core/bwa/index/main.nf
-    // TODO nf-core: Where applicable please provide/convert compressed files as input/output
-    //               e.g. "*.fastq.gz" and NOT "*.fastq", "*.bam" and NOT "*.sam" etc.
-    path bam
+    input:
+    tuple val(run_no), val(split), val(seed), path(dataset), path(parsed_config) // we convert back split to json to send it to python as python can not understand groovy objects
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    path "*.bam", emit: bam
-    // TODO nf-core: List additional required output channels/values here
-    // TODO nf-core: Update the command here to obtain the version number of the software used in this module
-    // TODO nf-core: If multiple software packages are used in this module, all MUST be added here
-    //               by copying the line below and replacing the current tool with the extra tool(s)
-    tuple val("${task.process}"), val('splitdata'), eval("splitdata --version"), topic: versions, emit: versions_splitdata
+    path 'test.pkl',     emit: test
+    path 'train.pkl',    emit: train
+    path 'train_idx.pkl',emit: train_idx
+    path 'val_idx.pkl',  emit: val_idx
+    path 'versions.yml', emit: versions
 
-    when:
-    task.ext.when == null || task.ext.when
 
-    script:
-    def args = task.ext.args ?: ''
-    
     // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
     //               If the software is unable to output a version number on the command-line then it can be manually specified
     //               e.g. https://github.com/nf-core/modules/blob/master/modules/nf-core/homer/annotatepeaks/main.nf
@@ -57,26 +47,26 @@ process SPLITDATA {
     //               using the Nextflow "task" variable e.g. "--threads $task.cpus"
     // TODO nf-core: Please replace the example samtools command below with your module's command
     // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
+    script:
     """
-    splitdata \\
-        $args \\
-        -@ $task.cpus \\
-        $bam
+    python ${projectDir}/bin/split.py \
+        --run_no ${run_no} \
+        --split '${JsonOutput.toJson(split)}'\
+        --seed ${seed} \
+        --dataset_path ${dataset} \
+        --parsed_config_path ${parsed_config}
+
+
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+        pandas: \$(python -c "import pandas as pd; print(pd.__version__)")
+        numpy: \$(python -c "import numpy as np; print(np.__version__)")
+        torch: \$(python -c "import torch; print(torch.__version__)")
+    END_VERSIONS
+
     """
 
-    stub:
-    def args = task.ext.args ?: ''
-    
-    // TODO nf-core: A stub section should mimic the execution of the original module as best as possible
-    //               Have a look at the following examples:
-    //               Simple example: https://github.com/nf-core/modules/blob/624977dfaf562211e68a8a868ca80acc8461f1ac/modules/nf-core/cutadapt/main.nf#L34-L46
-    //               Complex example: https://github.com/nf-core/modules/blob/88d43dad73a675e66bff49ebb57fe657a5909018/modules/nf-core/bedtools/split/main.nf#L32-L43
-    // TODO nf-core: If the module doesn't use arguments ($args), you SHOULD remove:
-    //               - The definition of args `def args = task.ext.args ?: ''` above.
-    //               - The use of the variable in the script `echo $args ` below.
-    """
-    echo $args
-    
-    touch ${prefix}.bam
-    """
+   
 }
