@@ -100,9 +100,7 @@ workflow PREPROCESS_DATA {
         }
     )
 
-    split_jobs = split_jobs.filter { run_no, split, seed, dataset, params, drug_features, cell_features ->
-        seed != null
-    }
+   
     SPLITDATA(
         split_jobs
     )

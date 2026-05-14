@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser(description="Split dataset into train, validation, and test sets.")
     parser.add_argument("--run_no", type=int, required=True, help="Run number for reproducibility.")
     parser.add_argument("--split", type=str, required=True, help="Split to perform.")
-    parser.add_argument("--seed", type=int, required=True, help="Random seed for reproducibility.")
+    parser.add_argument("--seed", type=str, required=True, help="Random seed for reproducibility (int or 'null').")
     parser.add_argument("--dataset_path", type=str, required=True, help="Path to the input dataset file (CSV).")
     parser.add_argument("--parsed_config_path", type=str, required=True, help="Path to the parsed config file (pickle).")
     parser.add_argument("--dfeat_dict", type=str, required=True, help="Path to the parsed drug features file (pickle).")
@@ -34,7 +34,17 @@ def load_parsed_config(path):
 def main():
 
     args = parse_args()
-    
+
+    # Normalize seed: Nextflow may pass the literal string 'null' when no seed
+    # is configured. Accept 'null' (case-insensitive) and empty strings as None.
+    seed_arg = args.seed
+   
+    seed_str = str(seed_arg).lower()
+    if seed_str in ("null", "none", ""):
+        seed = None
+    else:
+        seed = int(seed_arg)
+            
     print(f" parsed_config_path: {args.parsed_config_path}")
 
 
@@ -51,7 +61,9 @@ def main():
 
 
     # Perform the split using the wrapper function
-    test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(copy.deepcopy(synergy_df), split_type, test_frac, val_frac, seed = args.seed)
+    
+    
+    test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(copy.deepcopy(synergy_df), split_type, test_frac, val_frac, seed = seed)
     # Remove self-loops from the splits
     test_df, all_train_df, train_idx, val_idx = remove_self_loop_from_splits( test_df, all_train_df, train_idx, val_idx)
     # Select only the relevant columns for the output
@@ -68,7 +80,8 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     feat_str = get_feat_prefix(dfeat_dict, cfeat_dict)
-    split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{test_frac}_{val_frac}/run_{args.run_no}_{args.seed}/"
+    seed_str = "null" if seed is None else str(seed)
+    split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{test_frac}_{val_frac}/run_{args.run_no}_{seed_str}/"
     split_file_path = params.split_dir + split_info_str
     cur_dfeat_dict, cur_cfeat_dict = post_split_processing(dfeat_dict, cfeat_dict, all_train_df, params, split_info_str, device)
 

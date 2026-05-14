@@ -90,7 +90,7 @@ def verify_split(df, train_idx, test_idx, split_type):
         assert n_common == 0, print(f'error in {split_type} based split')
 
 
-def split_random_train_test(df, test_frac, seed=None):
+def split_random_train_test(df, test_frac, seed=None): 
     df['ID'] = list(range(len(df)))
     if 'edge_type' in df.columns:
         edges = list(set(zip(df['source'], df['target'], df['edge_type'])))
@@ -100,14 +100,14 @@ def split_random_train_test(df, test_frac, seed=None):
     # order in different runs, thus using random_state=int(e.g., 42) will not ensure the reproducible split each time on the same dataset.
     edges.sort()
     #split edges into train and test set
-    train_edges, test_edges = train_test_split(edges, test_size=test_frac, random_state=seed)
+    train_edges, test_edges = train_test_split(edges, test_size=test_frac, random_state=seed) # pairs that are train and test respecively.
     if 'edge_type' in df.columns:
         test_idx = list(df[df[['source','target','edge_type']].apply(tuple, axis=1).isin(test_edges)]['ID'])
     else:
-        test_idx = list(df[df[['source','target']].apply(tuple, axis=1).isin(test_edges)]['ID'])
+        test_idx = list(df[df[['source','target']].apply(tuple, axis=1).isin(test_edges)]['ID']) # get the indices of the rows in df that are in the test_edges. 
 
     # train_idx = list(df['ID'].drop(test_idx))
-    train_idx = list(df['ID'][~df['ID'].isin(test_idx)])
+    train_idx = list(df['ID'][~df['ID'].isin(test_idx)]) # get the indices of the rows in df that are not in the test_idx. This will be the train_idx.
     df.drop(columns='ID', inplace=True)
 
     return train_idx, test_idx
@@ -135,7 +135,7 @@ def split_edge_train_test(df, test_frac, seed=None):
 
 
 def split_node_train_test(df, test_frac, seed=None):
-
+    
     '''
     Function: Nodes appearing in training data will not appear in any edge in the test.
     '''
@@ -152,7 +152,7 @@ def split_node_train_test(df, test_frac, seed=None):
 
         # split nodes into train and test set
         train_nodes, test_nodes = train_test_split(nodes, test_size=test_frac, random_state=seed)
-
+        
         #both source and target has to be in test_nodes for a triplet or edge to be considered in test dataset.
         test_idx = list(df[(df['source'].isin(test_nodes)) & (df['target'].isin(test_nodes))]['ID'])
 
@@ -160,7 +160,7 @@ def split_node_train_test(df, test_frac, seed=None):
 
         if (len(test_idx)>0) and (len(train_idx)>0): #make sure that we don't get empty test or train dataset
             break
-
+        
         if isinstance(seed, (int)):
             print('Failed to split nodes such that train and test dataset are not empty. Try using random_state=None or np.random.RandomState or a different integer value than the current one ')
             sys.exit(1)
