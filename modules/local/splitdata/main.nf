@@ -51,7 +51,7 @@ process SPLITDATA {
     // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
     script:
     """
-    python ${projectDir}/bin/split.py \
+    split.py \
         --run_no ${run_no} \
         --split '${JsonOutput.toJson(split)}'\
         --seed ${seed} \
