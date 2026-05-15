@@ -4,25 +4,33 @@
 //               https://nf-co.re/join
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
-include { SAMTOOLS_SORT      } from '../../../modules/nf-core/samtools/sort/main'
-include { SAMTOOLS_INDEX     } from '../../../modules/nf-core/samtools/index/main'
+
 
 workflow TRAIN_AND_EVAL {
 
     take:
-    // TODO nf-core: edit input (take) channels
-    ch_bam // channel: [ val(meta), [ bam ] ]
+    loaded_inputs
+    inputs_json
+    params_json
+    synergy_df
+    drug_features
+    cell_features
+    drug_cell_features_combinations
+    test
+    train
+    train_idx
+    val_idx
+    curr_dfeat_dict
+    curr_cfeat_dict
+    
 
     main:
     // TODO nf-core: substitute modules here for the modules of your subworkflow
-
-    SAMTOOLS_SORT ( ch_bam )
-
-    SAMTOOLS_INDEX ( SAMTOOLS_SORT.out.bam )
+    ch_versions = Channel.empty()
+ 
 
     emit:
-    // TODO nf-core: edit emitted channels
-    bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]
-    bai      = SAMTOOLS_INDEX.out.bai          // channel: [ val(meta), [ bai ] ]
-    csi      = SAMTOOLS_INDEX.out.csi          // channel: [ val(meta), [ csi ] ]
+    versions  = ch_versions
+
+   
 }
