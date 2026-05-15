@@ -4,8 +4,7 @@
 //               https://nf-co.re/join
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
-
-
+include { EXPANDFEATUREDRUGCOMBINATIONSFILE } from '../../../modules/local/expandfeaturedrugcombinationsfile'
 workflow TRAIN_AND_EVAL {
 
     take:
@@ -27,7 +26,30 @@ workflow TRAIN_AND_EVAL {
     main:
     // TODO nf-core: substitute modules here for the modules of your subworkflow
     ch_versions = Channel.empty()
- 
+    EXPANDFEATUREDRUGCOMBINATIONSFILE(
+    drug_cell_features_combinations
+    )
+
+    feature_combination_ch =
+    EXPANDFEATUREDRUGCOMBINATIONSFILE.out.combinations
+        .splitText() // one line contains one drug feature and one cell feature, splitText() make nextflow see each line as a seperate channel item
+        .map { line ->
+
+            def (drug_feat, cell_feat) = line.trim().split('\t')
+
+            tuple(drug_feat, cell_feat)
+        }
+
+    training_jobs =
+    train
+        .combine(test)
+        .combine(train_idx)
+        .combine(val_idx)
+        .combine(curr_dfeat_dict)
+        .combine(curr_cfeat_dict)
+        .combine(feature_combination_ch)
+
+    training_jobs.view()
 
     emit:
     versions  = ch_versions
