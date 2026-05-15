@@ -5,7 +5,7 @@
 */
 include { softwareVersionsToYAML } from '../subworkflows/nf-core/utils_nfcore_pipeline' //Takes version info and converts it into structured YAML
 include { PREPROCESS_DATA } from '../subworkflows/local/preprocess_custom'
-
+include {TRAIN_AND_EVAL} from '../subworkflows/local/train_and_eval'
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     RUN MAIN WORKFLOW
@@ -22,9 +22,36 @@ workflow SYNVERSE {
     ch_versions = channel.empty() // Here I intialise an empty channel to collect software versions .
 
     PREPROCESS_DATA(
+    
     synverse_config
+
     )
+
     ch_versions = ch_versions.mix(PREPROCESS_DATA.out.versions)
+
+    TRAIN_AND_EVAL(
+
+    PREPROCESS_DATA.out.loaded_inputs,
+    PREPROCESS_DATA.out.inputs_json,
+    PREPROCESS_DATA.out.params_json,
+
+    PREPROCESS_DATA.out.synergy_df,
+    PREPROCESS_DATA.out.drug_features,
+    PREPROCESS_DATA.out.cell_features,
+    PREPROCESS_DATA.out.drug_cell_features_combinations,
+
+    PREPROCESS_DATA.out.test,
+    PREPROCESS_DATA.out.train,
+
+    PREPROCESS_DATA.out.train_idx,
+    PREPROCESS_DATA.out.val_idx,
+
+    PREPROCESS_DATA.out.curr_dfeat_dict,
+    PREPROCESS_DATA.out.curr_cfeat_dict
+    
+    )
+
+    ch_versions = ch_versions.mix(TRAIN_AND_EVAL.out.versions)
 
 
 

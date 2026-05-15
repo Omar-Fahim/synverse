@@ -115,9 +115,17 @@ workflow PREPROCESS_DATA {
     synergy_df     = LOADDATAFRAMES.out.synergy_df
     drug_features  = LOADDATAFRAMES.out.drug_features
     cell_features  = LOADDATAFRAMES.out.cell_features
+    drug_cell_features_combinations = LOADDATAFRAMES.out.drug_cell_feat_combs
     test            = SPLITDATA.out.test
     train           = SPLITDATA.out.train
     train_idx       = SPLITDATA.out.train_idx
     val_idx         = SPLITDATA.out.val_idx
+    curr_dfeat_dict = SPLITDATA.out.cur_dfeat_dict
+    curr_cfeat_dict = SPLITDATA.out.cur_cfeat_dict
     versions       = ch_versions
+
+
+
+
+
 }
