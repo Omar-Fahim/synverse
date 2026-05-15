@@ -120,8 +120,8 @@ workflow PREPROCESS_DATA {
     train           = SPLITDATA.out.train
     train_idx       = SPLITDATA.out.train_idx
     val_idx         = SPLITDATA.out.val_idx
-    curr_dfeat_dict = SPLITDATA.out.cur_dfeat_dict
-    curr_cfeat_dict = SPLITDATA.out.cur_cfeat_dict
+    cur_dfeat_dict = SPLITDATA.out.cur_dfeat_dict
+    cur_cfeat_dict = SPLITDATA.out.cur_cfeat_dict
     versions       = ch_versions
 
 
