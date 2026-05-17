@@ -12,7 +12,9 @@ import torch
 def parse_args():
     parser = argparse.ArgumentParser(description="Split dataset into train, validation, and test sets.")
     parser.add_argument("--run_no", type=int, required=True, help="Run number for reproducibility.")
-    parser.add_argument("--split", type=str, required=True, help="Split to perform.")
+    parser.add_argument("--split_type", type=str, required=True, help="Split type.")
+    parser.add_argument("--test_frac", type=float, required=True, help="Test fraction.")
+    parser.add_argument("--val_frac", type=float, required=True, help="Validation fraction.")
     parser.add_argument("--seed", type=str, required=True, help="Random seed for reproducibility (int or 'null').")
     parser.add_argument("--dataset_path", type=str, required=True, help="Path to the input dataset file (CSV).")
     parser.add_argument("--parsed_config_path", type=str, required=True, help="Path to the parsed config file (pickle).")
@@ -54,10 +56,9 @@ def main():
 
     # Load the dataset
     synergy_df = pd.read_csv(args.dataset_path, sep="\t")
-    split = json.loads(args.split)
-
-    split_type, test_frac, val_frac =split['type'], split['test_frac'], split['val_frac']
-
+    split_type = args.split_type
+    test_frac = args.test_frac
+    val_frac = args.val_frac
 
 
     # Perform the split using the wrapper function
