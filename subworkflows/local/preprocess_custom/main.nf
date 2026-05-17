@@ -77,30 +77,49 @@ workflow PREPROCESS_DATA {
                         ] */
 
     // PRINT COMBINATIONS_CH
-   split_jobs = (
-    combinations_ch
-        .map { run_no, split, seed ->
-            tuple(run_no, split, seed) // As we have converted the paramters json file to a groovy object, split was converted to a groovy map
-        } 
-        .combine(LOADDATAFRAMES.out.synergy_df)
-        .map { run_no, split, seed, synergy_df ->
-            tuple(run_no, split, seed, synergy_df)
-        }
-        .combine(LOADINPUTS.out.loaded_inputs)
-        .map { run_no, split, seed, synergy_df, loaded_inputs ->
-            tuple(run_no, split, seed, synergy_df, loaded_inputs)
-        }
-        .combine(LOADDATAFRAMES.out.drug_features)
-        .map { run_no, split, seed, synergy_df, loaded_inputs, drug_features ->
-            tuple(run_no, split, seed, synergy_df, loaded_inputs, drug_features)
-        }
-        .combine(LOADDATAFRAMES.out.cell_features)
-        .map { run_no, split, seed, synergy_df, loaded_inputs, drug_features, cell_features ->
-            tuple(run_no, split, seed, synergy_df, loaded_inputs, drug_features, cell_features)
-        }
-    )
+split_jobs = combinations_ch
 
-   
+    .map { run_no, split, seed ->
+
+        tuple(
+            run_no,
+            split.type,
+            split.test_frac,
+            split.val_frac,
+            seed
+        )
+    }
+
+    .combine(LOADDATAFRAMES.out.synergy_df)
+    .combine(LOADINPUTS.out.loaded_inputs)
+    .combine(LOADDATAFRAMES.out.drug_features)
+    .combine(LOADDATAFRAMES.out.cell_features)
+
+    .map {
+        run_no,
+        split_type,
+        test_frac,
+        val_frac,
+        seed,
+        synergy_df,
+        loaded_inputs,
+        drug_features,
+        cell_features ->
+
+        tuple(
+            run_no,
+            split_type,
+            test_frac,
+            val_frac,
+            seed,
+            synergy_df,
+            loaded_inputs,
+            drug_features,
+            cell_features
+        )
+    }
+
+
     SPLITDATA(
         split_jobs
     )
@@ -116,12 +135,7 @@ workflow PREPROCESS_DATA {
     drug_features  = LOADDATAFRAMES.out.drug_features
     cell_features  = LOADDATAFRAMES.out.cell_features
     drug_cell_features_combinations = LOADDATAFRAMES.out.drug_cell_feat_combs
-    test            = SPLITDATA.out.test
-    train           = SPLITDATA.out.train
-    train_idx       = SPLITDATA.out.train_idx
-    val_idx         = SPLITDATA.out.val_idx
-    cur_dfeat_dict = SPLITDATA.out.cur_dfeat_dict
-    cur_cfeat_dict = SPLITDATA.out.cur_cfeat_dict
+    split_bundle   = SPLITDATA.out.split_bundle
     versions       = ch_versions
 
 
