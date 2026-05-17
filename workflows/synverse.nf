@@ -40,14 +40,8 @@ workflow SYNVERSE {
     PREPROCESS_DATA.out.cell_features,
     PREPROCESS_DATA.out.drug_cell_features_combinations,
 
-    PREPROCESS_DATA.out.test,
-    PREPROCESS_DATA.out.train,
+    PREPROCESS_DATA.out.split_bundle
 
-    PREPROCESS_DATA.out.train_idx,
-    PREPROCESS_DATA.out.val_idx,
-
-    PREPROCESS_DATA.out.cur_dfeat_dict,
-    PREPROCESS_DATA.out.cur_cfeat_dict
     
     )
 
