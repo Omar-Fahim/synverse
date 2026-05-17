@@ -15,12 +15,7 @@ workflow TRAIN_AND_EVAL {
     drug_features
     cell_features
     drug_cell_features_combinations
-    test
-    train
-    train_idx
-    val_idx
-    curr_dfeat_dict
-    curr_cfeat_dict
+    split_bundle
     
 
     main:
@@ -40,14 +35,49 @@ workflow TRAIN_AND_EVAL {
             tuple(drug_feat, cell_feat)
         }
 
-    training_jobs =
-    train
-        .combine(test)
-        .combine(train_idx)
-        .combine(val_idx)
-        .combine(curr_dfeat_dict)
-        .combine(curr_cfeat_dict)
+   training_jobs =
+    split_bundle
         .combine(feature_combination_ch)
+        .map {
+
+            run_no,
+            split_type,
+            test_frac,
+            val_frac,
+            seed,
+
+            test_file,
+            train_file,
+            train_idx_file,
+            val_idx_file,
+
+            dfeat_file,
+            cfeat_file,
+
+            drug_feat,
+            cell_feat ->
+
+            tuple(
+                run_no,
+
+                split_type,
+                test_frac,
+                val_frac,
+
+                seed,
+
+                test_file,
+                train_file,
+                train_idx_file,
+                val_idx_file,
+
+                dfeat_file,
+                cfeat_file,
+
+                drug_feat,
+                cell_feat
+            )
+        }
 
     training_jobs.view()
 
