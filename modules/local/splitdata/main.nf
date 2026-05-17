@@ -17,27 +17,22 @@
 import groovy.json.JsonOutput
 
 process SPLITDATA {
-    tag { "run_${run_no}_split_${split.type}_seed_${seed}" }
+    tag "run_${run_no}_split_${split_type}_seed_${seed}"
     label 'process_low'
     
-    publishDir path: { "${params.outdir}/splitdata/run_${run_no}_split_${split.type}_seed_${seed}" }, mode: params.publish_dir_mode, saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
+    publishDir path: "${params.outdir}/splitdata/run_${run_no}_split_${split_type}_seed_${seed}", mode: params.publish_dir_mode, saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
     'docker://python:3.13':
     'python:3.13' }"
-
     input:
-    tuple val(run_no), val(split), val(seed), path(dataset), path(parsed_config), path(dfeat_dict), path(cfeat_dict) // we convert back split to json to send it to python as python can not understand groovy objects
+    tuple val(run_no), val(split_type), val(test_frac),val(val_frac), val(seed), path(dataset), path(parsed_config), path(dfeat_dict), path(cfeat_dict) // we convert back split to json to send it to python as python can not understand groovy objects
 
     output:
-    path 'test.pkl',     emit: test
-    path 'train.pkl',    emit: train
-    path 'train_idx.pkl',emit: train_idx
-    path 'val_idx.pkl',  emit: val_idx
-    path 'cur_dfeat_dict.pkl', emit: cur_dfeat_dict
-    path 'cur_cfeat_dict.pkl', emit: cur_cfeat_dict
-    path 'versions.yml', emit: versions
+    tuple val(run_no), val(split_type), val(test_frac), val(val_frac), val(seed), path("test.pkl"), path("train.pkl"), path("train_idx.pkl"), path("val_idx.pkl"), path("cur_dfeat_dict.pkl"), path("cur_cfeat_dict.pkl"), emit: split_bundle
+
+    path("versions.yml"), emit: versions
 
 
     // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
@@ -53,10 +48,12 @@ process SPLITDATA {
     """
     split.py \
         --run_no ${run_no} \
-        --split '${JsonOutput.toJson(split)}'\
+        --split_type ${split_type} \
+        --test_frac ${test_frac} \
+        --val_frac ${val_frac} \
         --seed ${seed} \
         --dataset_path ${dataset} \
-        --parsed_config_path ${parsed_config}\
+        --parsed_config_path ${parsed_config} \
         --dfeat_dict ${dfeat_dict} \
         --cfeat_dict ${cfeat_dict}
 
