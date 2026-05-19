@@ -5,6 +5,7 @@
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
 include { EXPANDFEATUREDRUGCOMBINATIONSFILE } from '../../../modules/local/expandfeaturedrugcombinationsfile'
+include{ TRAINANDEVAL } from '../../../modules/local/trainandeval'
 workflow TRAIN_AND_EVAL {
 
     take:
@@ -79,8 +80,10 @@ workflow TRAIN_AND_EVAL {
             )
         }
 
-    training_jobs.view()
-
+    TRAINANDEVAL(
+        training_jobs
+    )
+    ch_versions = ch_versions.mix(TRAINANDEVAL.out.versions)
     emit:
     versions  = ch_versions
 
