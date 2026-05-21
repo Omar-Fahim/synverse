@@ -32,7 +32,6 @@ workflow SYNVERSE {
     TRAIN_AND_EVAL(
 
     PREPROCESS_DATA.out.loaded_inputs,
-    PREPROCESS_DATA.out.inputs_json,
     PREPROCESS_DATA.out.params_json,
 
     PREPROCESS_DATA.out.synergy_df,

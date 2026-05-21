@@ -2,6 +2,8 @@
 
 import argparse
 import pickle
+import json
+from types import SimpleNamespace
 from pathlib import Path
 
 
@@ -28,6 +30,7 @@ def parse_args():
     parser.add_argument("--cfeat_file", required=True)
     parser.add_argument("--drug_feat", required=True)
     parser.add_argument("--cell_feat", required=True)
+    parser.add_argument("--params_json", required=True)
     return parser.parse_args()
 
 
@@ -36,7 +39,13 @@ def load_pickle(path):
         return pickle.load(handle)
 
 
+def load_json(path):
+    with open(Path(path), "r") as handle:
+        return json.load(handle)
 
+
+def load_params(path):
+    return SimpleNamespace(**load_json(path))
 
 
 
@@ -55,7 +64,7 @@ def main():
     else:
         seed = int(args.seed)
 
- 
+    params = load_params(args.params_json)
 
     test_df = load_pickle(args.test_file)
     all_train_df = load_pickle(args.train_file)
@@ -70,6 +79,12 @@ def main():
 
     select_dfeat_dict = keep_selected_feat(cur_dfeat_dict, select_drug_feat)
     select_cfeat_dict = keep_selected_feat(cur_cfeat_dict, select_cell_feat)
+
+    select_model_info = get_select_model_info(params.model_info, select_dfeat_dict['encoder'], select_cfeat_dict['encoder'])
+    params.hyperparam = combine_hyperparams(select_model_info)
+    given_epochs = params.epochs
+
+
 
     # select_model_info = get_select_model_info(
     #     params.model_info,

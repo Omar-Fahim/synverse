@@ -10,7 +10,6 @@ workflow TRAIN_AND_EVAL {
 
     take:
     loaded_inputs
-    inputs_json
     params_json
     synergy_df
     drug_features
@@ -39,6 +38,7 @@ workflow TRAIN_AND_EVAL {
    training_jobs =
     split_bundle
         .combine(feature_combination_ch)
+        .combine(params_json)
         .map {
 
             run_no,
@@ -56,7 +56,9 @@ workflow TRAIN_AND_EVAL {
             cfeat_file,
 
             drug_feat,
-            cell_feat ->
+            cell_feat,
+            params_json
+             ->
 
             tuple(
                 run_no,
@@ -76,7 +78,8 @@ workflow TRAIN_AND_EVAL {
                 cfeat_file,
 
                 drug_feat,
-                cell_feat
+                cell_feat,
+                params_json
             )
         }
 
