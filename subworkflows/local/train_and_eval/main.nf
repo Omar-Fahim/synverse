@@ -77,7 +77,7 @@ workflow TRAIN_AND_EVAL {
                 dfeat_file,
                 cfeat_file,
 
-                drug_feat,
+                drug_feat, // not the drug_features.pkl . this one is from combinations.
                 cell_feat,
                 params_json
             )

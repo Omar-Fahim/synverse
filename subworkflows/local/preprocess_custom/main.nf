@@ -114,7 +114,7 @@ split_jobs = combinations_ch
             seed,
             synergy_df,
             loaded_inputs,
-            drug_features,
+            drug_features, // the picke file that contains dfeat_dict
             cell_features
         )
     }
@@ -135,7 +135,7 @@ split_jobs = combinations_ch
     drug_features  = LOADDATAFRAMES.out.drug_features
     cell_features  = LOADDATAFRAMES.out.cell_features
     drug_cell_features_combinations = LOADDATAFRAMES.out.drug_cell_feat_combs
-    split_bundle   = SPLITDATA.out.split_bundle
+    split_bundle   = SPLITDATA.out.split_bundle // this contains dfeat_dict and cfeat_dict after splitting.
     versions       = ch_versions
 
 

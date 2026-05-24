@@ -10,10 +10,11 @@ from pathlib import Path
 from utils import (
     combine_hyperparams,
     create_file_prefix,
+    get_feat_prefix,
     get_select_model_info,
     keep_selected_feat,
 )
-
+from run_manager import RunManagerFactory
 
 def parse_args():
     parser = argparse.ArgumentParser(
@@ -74,6 +75,9 @@ def main():
     cur_cfeat_dict = load_pickle(args.cfeat_file)
     select_drug_feat = args.drug_feat
     select_cell_feat = args.cell_feat
+    split_type = args.split_type
+    run_no = args.run_no
+
     
     print("drug and cell line features in use:", select_drug_feat, select_cell_feat)
 
@@ -83,7 +87,13 @@ def main():
     select_model_info = get_select_model_info(params.model_info, select_dfeat_dict['encoder'], select_cfeat_dict['encoder'])
     params.hyperparam = combine_hyperparams(select_model_info)
     given_epochs = params.epochs
-
+    feat_str = get_feat_prefix(cur_dfeat_dict, cur_cfeat_dict) # In the original synverse code, he uses the dfeat_dict and cfeat_dict before the splitting. It is just a method for naming files so it is just added complexity to keep passing the orignal dictionaries 
+    out_file_prefix = create_file_prefix(params, select_dfeat_dict, select_cfeat_dict, split_type,
+                                                      split_feat_str=feat_str, run_no=run_no, seed=seed)
+    
+    run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
+                            train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device, **kwargs)
+    run_manager.run_wrapper()
 
 
     # select_model_info = get_select_model_info(
