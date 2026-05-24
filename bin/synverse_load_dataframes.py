@@ -79,7 +79,7 @@ def load_dataframes(params, inputs, device):
     drug_cell_feat_combs = get_feature_comb_wrapper(dfeat_dict, cfeat_dict,
                             max_drug_feat=params.max_drug_feat,
                             min_drug_feat = params.min_drug_feat, max_cell_feat=params.max_cell_feat, min_cell_feat = params.min_cell_feat)
-    return synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs
+    return synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs, drug_2_idx, cell_line_2_idx
 
 
 def main():
@@ -89,7 +89,7 @@ def main():
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-    synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs = load_dataframes(params, inputs, device)
+    synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs, drug_2_idx, cell_line_2_idx = load_dataframes(params, inputs, device)
     synergy_df.to_csv("synergy_df.tsv", sep="\t", index=False)
 
 
@@ -102,6 +102,12 @@ def main():
                                
     with open("drug_cell_feat_combs.pkl", "wb") as f:
         pickle.dump(drug_cell_feat_combs, f)
+
+    with open("drug_2_idx.pkl", "wb") as f:
+        pickle.dump(drug_2_idx, f)
+
+    with open("cell_line_2_idx.pkl", "wb") as f:
+        pickle.dump(cell_line_2_idx, f)
 
 
         
