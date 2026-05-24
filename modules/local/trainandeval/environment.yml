@@ -12,8 +12,14 @@ dependencies:
   - numpy
   - pandas
   - scikit-learn
+  - transformers
+  - netifaces
 
   - pip:
       - torch
       - torch_geometric>=2.7.0
+      - ConfigSpace
+      - hpbandster
+      - pytz
+      - wandb
   

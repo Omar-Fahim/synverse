@@ -39,7 +39,9 @@ workflow SYNVERSE {
     PREPROCESS_DATA.out.cell_features,
     PREPROCESS_DATA.out.drug_cell_features_combinations,
 
-    PREPROCESS_DATA.out.split_bundle
+    PREPROCESS_DATA.out.split_bundle,
+    PREPROCESS_DATA.out.cell_line_2_idx,
+    PREPROCESS_DATA.out.drug_2_idx
 
     
     )

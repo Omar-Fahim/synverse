@@ -26,7 +26,7 @@ process TRAINANDEVAL {
         'python:3.13' }"
 
     input:
-    tuple val(run_no), val(split_type), val(test_frac), val(val_frac), val(seed), path(test_file), path(train_file), path(train_idx_file), path(val_idx_file), path(dfeat_file), path(cfeat_file), val(drug_feat), val(cell_feat), path(params_json)
+    tuple val(run_no), val(split_type), val(test_frac), val(val_frac), val(seed), path(test_file), path(train_file), path(train_idx_file), path(val_idx_file), path(dfeat_file), path(cfeat_file), val(drug_feat), val(cell_feat), path(params_json), path(cell_line_2_idx), path(drug_2_idx)
 
     output:
     path "versions.yml", emit: versions
@@ -48,7 +48,9 @@ process TRAINANDEVAL {
         --cfeat_file ${cfeat_file} \\
         --drug_feat '${drug_feat}' \\
         --cell_feat '${cell_feat}' \\
-        --params_json '${params_json}'
+        --params_json '${params_json}' \\
+        --cell_line_2_idx '${cell_line_2_idx}' \\
+        --drug_2_idx '${drug_2_idx}'
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

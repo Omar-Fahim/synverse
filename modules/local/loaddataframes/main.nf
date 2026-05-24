@@ -33,6 +33,8 @@ process LOADDATAFRAMES {
     path 'drug_features.pkl', emit: drug_features
     path 'cell_features.pkl', emit: cell_features
     path 'drug_cell_feat_combs.pkl', emit: drug_cell_feat_combs
+    path 'cell_line_2_idx.pkl', emit: cell_line_2_idx
+    path 'drug_2_idx.pkl', emit: drug_2_idx
     path 'versions.yml', emit: versions
 
   

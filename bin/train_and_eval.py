@@ -5,7 +5,7 @@ import pickle
 import json
 from types import SimpleNamespace
 from pathlib import Path
-
+import torch
 
 from utils import (
     combine_hyperparams,
@@ -32,6 +32,8 @@ def parse_args():
     parser.add_argument("--drug_feat", required=True)
     parser.add_argument("--cell_feat", required=True)
     parser.add_argument("--params_json", required=True)
+    parser.add_argument("--cell_line_2_idx", required=True)
+    parser.add_argument("--drug_2_idx", required=True)
     return parser.parse_args()
 
 
@@ -77,6 +79,8 @@ def main():
     select_cell_feat = args.cell_feat
     split_type = args.split_type
     run_no = args.run_no
+    cell_line_2_idx = load_pickle(args.cell_line_2_idx)
+    drug_2_idx = load_pickle(args.drug_2_idx)
 
     
     print("drug and cell line features in use:", select_drug_feat, select_cell_feat)
@@ -91,9 +95,11 @@ def main():
     out_file_prefix = create_file_prefix(params, select_dfeat_dict, select_cfeat_dict, split_type,
                                                       split_feat_str=feat_str, run_no=run_no, seed=seed)
     
-    run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
-                            train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device, **kwargs)
-    run_manager.run_wrapper()
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    
+    # run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
+    #                         train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device)
+    # run_manager.run_wrapper()
 
 
     # select_model_info = get_select_model_info(

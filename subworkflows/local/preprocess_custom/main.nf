@@ -136,6 +136,8 @@ split_jobs = combinations_ch
     cell_features  = LOADDATAFRAMES.out.cell_features
     drug_cell_features_combinations = LOADDATAFRAMES.out.drug_cell_feat_combs
     split_bundle   = SPLITDATA.out.split_bundle // this contains dfeat_dict and cfeat_dict after splitting.
+    cell_line_2_idx = LOADDATAFRAMES.out.cell_line_2_idx
+    drug_2_idx = LOADDATAFRAMES.out.drug_2_idx
     versions       = ch_versions
 
 

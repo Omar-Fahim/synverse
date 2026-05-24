@@ -16,6 +16,8 @@ workflow TRAIN_AND_EVAL {
     cell_features
     drug_cell_features_combinations
     split_bundle
+    cell_line_2_idx
+    drug_2_idx
     
 
     main:
@@ -39,6 +41,8 @@ workflow TRAIN_AND_EVAL {
     split_bundle
         .combine(feature_combination_ch)
         .combine(params_json)
+        .combine(cell_line_2_idx)
+        .combine(drug_2_idx)
         .map {
 
             run_no,
@@ -57,7 +61,9 @@ workflow TRAIN_AND_EVAL {
 
             drug_feat,
             cell_feat,
-            params_json
+            params_json,
+            cell_line_2_idx,
+            drug_2_idx
              ->
 
             tuple(
@@ -79,7 +85,9 @@ workflow TRAIN_AND_EVAL {
 
                 drug_feat, // not the drug_features.pkl . this one is from combinations.
                 cell_feat,
-                params_json
+                params_json,
+                cell_line_2_idx,
+                drug_2_idx
             )
         }
 
