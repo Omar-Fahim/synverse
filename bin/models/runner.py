@@ -26,7 +26,7 @@ import logging
 class Runner(ABC):
     def __init__(self, train_val_triplets_df, train_idx, val_idx, dfeat_dict,
                  cfeat_dict, out_file_prefix,
-                 params, model_info, device, **kwargs):
+                 params, model_info, device, ):
 
         self.worker_cls = HP_Worker
         self.drug_encoder_info = model_info.get('drug_encoder')
@@ -36,7 +36,7 @@ class Runner(ABC):
 
         out_file = out_file_prefix + '.txt'
         os.makedirs(os.path.dirname(out_file), exist_ok=True)
-        self.split_type = kwargs.get('split_type', '')
+        self.split_type = params.split_type
         self.score_name = params.score_name
         self.triplets_scores_dataset = self.get_triplets_score_dataset(train_val_triplets_df, score_name=self.score_name)
 
@@ -335,7 +335,7 @@ class Runner(ABC):
         idle_epochs = 0
 
         # Scheduler to reduce learning rate on plateau
-        scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10, verbose=True)
+        scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=0.5, patience=10)
 
         for i in range(int(n_epochs)):
             train_loss = 0

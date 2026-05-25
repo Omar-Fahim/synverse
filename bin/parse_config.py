@@ -43,7 +43,10 @@ class Params:
     split_dir: str
     start_run: int
     end_run: int
-    seeds:  dict[str, list[int]]  
+    seeds:  dict[str, list[int]]
+    train_type: str  
+    use_best_hyperparam: bool = False  
+    split_type: str = ''  # Added split_type to Params
 
 
 def parse_config(config_map):
@@ -96,7 +99,10 @@ def parse_config(config_map):
         split_dir=f"{input_dir}/splits",
         start_run=input_settings.get('start_run', 1),
         end_run=input_settings.get('end_run', 1),
-        seeds=input_settings.get('seeds', {})
+        seeds=input_settings.get('seeds', {}),
+        train_type=input_settings.get('train_type', 'regular'),
+        use_best_hyperparam=input_settings.get('use_best_hyperparam', False),
+        split_type=input_settings.get('split_type', '')
     )
 
     # Checks

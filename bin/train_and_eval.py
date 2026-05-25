@@ -97,9 +97,9 @@ def main():
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     
-    # run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
-    #                         train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device)
-    # run_manager.run_wrapper()
+    run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
+                             train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device,train_type=params.train_type)
+    run_manager.run_wrapper()
 
 
     # select_model_info = get_select_model_info(
