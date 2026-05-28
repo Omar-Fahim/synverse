@@ -17,7 +17,7 @@
 
 process TRAINANDEVAL {
     tag "run_${run_no}_split_${split_type}_${drug_feat}_${cell_feat}"
-    label 'process_single'
+    label 'process_low'
 
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"
