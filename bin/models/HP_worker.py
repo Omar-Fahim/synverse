@@ -81,10 +81,10 @@ class HP_Worker(Worker):
         if model_params['decoder']['name'] =='MLP':
             final_mlp_params = model_params['decoder']['hp_range']
             # ****************** GENERAL configurations ***********************************************
-            lr = CSH.UniformFloatHyperparameter('lr', lower=final_mlp_params['lr'][0], upper=final_mlp_params['lr'][1], default_value=1e-4, log=True)
+            lr = CSH.UniformFloatHyperparameter('lr', lower=float(final_mlp_params['lr'][0]), upper=float(final_mlp_params['lr'][1]), default_value=1e-4, log=True)
             optimizer = CSH.CategoricalHyperparameter('optimizer', final_mlp_params['optimizer'])
-            sgd_momentum = CSH.UniformFloatHyperparameter('sgd_momentum', lower=final_mlp_params.get('sgd_momentum',[0,0])[0],
-                            upper=final_mlp_params.get('sgd_momentum',[0.99,0.99])[1], default_value=0.9, log=False)
+            sgd_momentum = CSH.UniformFloatHyperparameter('sgd_momentum', lower=float(final_mlp_params.get('sgd_momentum',[0,0])[0]),
+                            upper=float(final_mlp_params.get('sgd_momentum',[0.99,0.99])[1]), default_value=0.9, log=False)
             cs.add_hyperparameters([lr, optimizer, sgd_momentum])
             # The hyperparameter sgd_momentum will be used,if the configuration
             # contains 'SGD' as optimizer.
@@ -94,8 +94,8 @@ class HP_Worker(Worker):
             #********************* Configurations for synergy predicting MLP layer **********************
 
             num_hid_layers = CSH.UniformIntegerHyperparameter('num_hid_layers',
-                                                              lower=final_mlp_params['num_hid_layers'][0],
-                                                              upper=final_mlp_params['num_hid_layers'][1],
+                                                              lower=int(final_mlp_params['num_hid_layers'][0]),
+                                                              upper=int(final_mlp_params['num_hid_layers'][1]),
                                                               default_value=2)
 
             hid_0 = CSH.CategoricalHyperparameter('hid_0',final_mlp_params['hid_0'])
@@ -107,10 +107,10 @@ class HP_Worker(Worker):
             cs.add_condition(cond)
             cond = CS.GreaterThanCondition(hid_2, num_hid_layers, 2)
             cs.add_condition(cond)
-            in_dropout_rate = CSH.UniformFloatHyperparameter('in_dropout_rate', lower=final_mlp_params['in_dropout_rate'][0],
-                                    upper=final_mlp_params['in_dropout_rate'][1], default_value=0.5,log=False)
-            hid_dropout_rate = CSH.UniformFloatHyperparameter('hid_dropout_rate', lower=final_mlp_params['hid_dropout_rate'][0],
-                                    upper=final_mlp_params['hid_dropout_rate'][1], default_value=0.5,log=False)
+            in_dropout_rate = CSH.UniformFloatHyperparameter('in_dropout_rate', lower=float(final_mlp_params['in_dropout_rate'][0]),
+                                    upper=float(final_mlp_params['in_dropout_rate'][1]), default_value=0.5,log=False)
+            hid_dropout_rate = CSH.UniformFloatHyperparameter('hid_dropout_rate', lower=float(final_mlp_params['hid_dropout_rate'][0]),
+                                    upper=float(final_mlp_params['hid_dropout_rate'][1]), default_value=0.5,log=False)
 
             cs.add_hyperparameters([in_dropout_rate, hid_dropout_rate])
 
@@ -124,8 +124,8 @@ class HP_Worker(Worker):
                 cs.add_hyperparameters([batch_norm])
 
                 gnn_num_layers = CSH.UniformIntegerHyperparameter('gnn_num_layers',
-                                                                  lower=encoder_params['gnn_num_layers'][0],
-                                                                  upper=encoder_params['gnn_num_layers'][1],
+                                                                  lower=int(encoder_params['gnn_num_layers'][0]),
+                                                                  upper=int(encoder_params['gnn_num_layers'][1]),
                                                                   default_value=2)
                 gnn_0 = CSH.CategoricalHyperparameter('gnn_0', encoder_params['gnn_0'])
                 gnn_1 = CSH.CategoricalHyperparameter('gnn_1', encoder_params['gnn_1'])
@@ -138,8 +138,8 @@ class HP_Worker(Worker):
                 cs.add_condition(cond)
                 #needs a/multiple feed forward layer as well
                 ff_num_layers = CSH.UniformIntegerHyperparameter('ff_num_layers',
-                                                                 lower=encoder_params['ff_num_layers'][0],
-                                                                 upper=encoder_params['ff_num_layers'][1],
+                                                                 lower=int(encoder_params['ff_num_layers'][0]),
+                                                                 upper=int(encoder_params['ff_num_layers'][1]),
                                                                  default_value=2)
                 ff_0 = CSH.CategoricalHyperparameter('ff_0', encoder_params['ff_0'])
                 ff_1 = CSH.CategoricalHyperparameter('ff_1', encoder_params['ff_1'])
@@ -151,8 +151,8 @@ class HP_Worker(Worker):
                 cs.add_condition(cond)
                 cond = CS.GreaterThanCondition(ff_2, ff_num_layers, 2)
                 cs.add_condition(cond)
-                dropout = CSH.UniformFloatHyperparameter('gnn_dropout', lower=encoder_params['gnn_dropout'][0],
-                                        upper=encoder_params['gnn_dropout'][1], default_value=0.5, log=False)
+                dropout = CSH.UniformFloatHyperparameter('gnn_dropout', lower=float(encoder_params['gnn_dropout'][0]),
+                                        upper=float(encoder_params['gnn_dropout'][1]), default_value=0.5, log=False)
                 cs.add_hyperparameters([dropout])
 
             if ((drug_encoder['name']=='Transformer') or (drug_encoder['name']=='Transformer_Berttokenizer')):

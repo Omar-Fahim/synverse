@@ -1,3 +1,5 @@
+import json
+
 from models.synversemodel import *
 from models.HP_worker import HP_Worker
 from models.model_utils import *
@@ -22,7 +24,20 @@ import os
 import time
 import copy
 import logging
+import Pyro4
+Pyro4.config.SERIALIZER = 'pickle'
+Pyro4.config.SERIALIZERS_ACCEPTED = {'pickle'}
 
+
+class NumpyEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if isinstance(obj, np.integer):  return int(obj)
+        if isinstance(obj, np.floating): return float(obj)
+        if isinstance(obj, np.bool_):    return bool(obj)
+        if isinstance(obj, np.str_):     return str(obj)
+        if isinstance(obj, np.ndarray):  return obj.tolist()
+        return super().default(obj)
+    
 class Runner(ABC):
     def __init__(self, train_val_triplets_df, train_idx, val_idx, dfeat_dict,
                  cfeat_dict, out_file_prefix,
@@ -100,6 +115,7 @@ class Runner(ABC):
 
 
     def find_best_hyperparam(self, server_type):
+        json._default_encoder = NumpyEncoder() 
         self.result_logger = hpres.json_result_logger(directory=self.out_file.replace('.txt',''), overwrite=True)
         min_budget = self.bohb_params['min_budget']
         max_budget = self.bohb_params['max_budget']
