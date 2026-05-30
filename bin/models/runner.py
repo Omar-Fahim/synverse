@@ -99,7 +99,7 @@ class Runner(ABC):
         return triplets_scores_dataset
 
 
-    def find_best_hyperparam(self, server_type, **kwargs):
+    def find_best_hyperparam(self, server_type):
         self.result_logger = hpres.json_result_logger(directory=self.out_file.replace('.txt',''), overwrite=True)
         min_budget = self.bohb_params['min_budget']
         max_budget = self.bohb_params['max_budget']
@@ -110,7 +110,7 @@ class Runner(ABC):
 
         if server_type == 'local':
             # get the used specified setting here about wandb and BOHB
-            run_id = kwargs.get("run_id")
+            run_id = self.bohb_params['run_id']
             # Step 2: Start a worker #Nure: Model specific
             formatted_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             run_id = f'{run_id}_{formatted_time}'

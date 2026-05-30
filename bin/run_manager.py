@@ -30,8 +30,8 @@ class BaseRunManager:
                         out_file_prefix, self.params, self.model_info,
                         self.device)
 
-        # if self.params.hp_tune:
-        #     runner.find_best_hyperparam(self.params.bohb['server_type'])
+        if self.params.hp_tune:
+            runner.find_best_hyperparam(self.params.bohb['server_type'])
 
         hyperparam_file = self.out_file_prefix + '_best_hyperparam.txt'
         if os.path.exists(hyperparam_file):
