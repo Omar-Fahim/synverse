@@ -18,7 +18,7 @@
 process TRAINANDEVAL {
     tag "run_${run_no}_split_${split_type}_${drug_feat}_${cell_feat}"
     label 'process_low'
-
+    publishDir path: "${params.outdir}/trainandeval", mode: params.publish_dir_mode, saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
@@ -30,6 +30,7 @@ process TRAINANDEVAL {
 
     output:
     path "versions.yml", emit: versions
+    path "results/**", emit: results
     
 
     
@@ -50,7 +51,9 @@ process TRAINANDEVAL {
         --cell_feat '${cell_feat}' \\
         --params_json '${params_json}' \\
         --cell_line_2_idx '${cell_line_2_idx}' \\
-        --drug_2_idx '${drug_2_idx}'
+        --drug_2_idx '${drug_2_idx}' \\
+        --out_dir results
+
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

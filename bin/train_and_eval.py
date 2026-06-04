@@ -34,6 +34,8 @@ def parse_args():
     parser.add_argument("--params_json", required=True)
     parser.add_argument("--cell_line_2_idx", required=True)
     parser.add_argument("--drug_2_idx", required=True)
+    parser.add_argument("--out_dir", required=True)
+
     return parser.parse_args()
 
 
@@ -81,6 +83,7 @@ def main():
     run_no = args.run_no
     cell_line_2_idx = load_pickle(args.cell_line_2_idx)
     drug_2_idx = load_pickle(args.drug_2_idx)
+    params.out_dir = args.out_dir
 
     
     print("drug and cell line features in use:", select_drug_feat, select_cell_feat)
