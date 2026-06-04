@@ -2,7 +2,7 @@ import os.path
 
 from models.runner import *
 from utils import *
-
+from feature_shuffle import shuffle_features
 class BaseRunManager:
     def __init__(self, params, model_info, given_epochs, train_df, train_idx, val_idx,
                  dfeat_dict, cfeat_dict, test_df, drug_2_idx,cell_line_2_idx,out_file_prefix,file_prefix, device):
@@ -51,6 +51,28 @@ class BaseRunManager:
     def run_wrapper(self):
         self.execute_run(self.train_df, self.train_idx, self.val_idx, self.dfeat_dict, self.cfeat_dict, self.out_file_prefix)
 
+class ShuffleRunManager(BaseRunManager):
+    def run_wrapper(self):
+        for shuffle_no  in range (10):
+            # Shuffle features for a single run
+            shuffled_dfeat_dict = {**self.dfeat_dict, 'value': shuffle_features(self.dfeat_dict['value'])}
+            shuffled_cfeat_dict = {**self.cfeat_dict, 'value': shuffle_features(self.cfeat_dict['value'])}
+
+            out_file_prefix_shuffle = f'{self.out_file_prefix}_shuffled_{shuffle_no}'
+            self.execute_run(self.train_df, self.train_idx, self.val_idx, shuffled_dfeat_dict, shuffled_cfeat_dict, out_file_prefix_shuffle)
+
+            del shuffled_dfeat_dict
+            del shuffled_cfeat_dict
+
+
+
+
+
+
+
+
+
+
 class RunManagerFactory:
     @staticmethod
     def get_run_manager(params, model_info, given_epochs, train_df, train_idx, val_idx,
@@ -59,7 +81,8 @@ class RunManagerFactory:
 
         
         cls = {
-            "regular": BaseRunManager
+            "regular": BaseRunManager,
+            "shuffle": ShuffleRunManager
         }.get(train_type, BaseRunManager)
 
         return cls(params, model_info, given_epochs, train_df, train_idx, val_idx,
