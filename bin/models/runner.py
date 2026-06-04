@@ -51,7 +51,7 @@ class Runner(ABC):
 
         out_file = out_file_prefix + '.txt'
         os.makedirs(os.path.dirname(out_file), exist_ok=True)
-        self.split_type = params.split_type
+        #self.split_type = params.split_type
         self.score_name = params.score_name
         self.triplets_scores_dataset = self.get_triplets_score_dataset(train_val_triplets_df, score_name=self.score_name)
 
