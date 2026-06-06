@@ -95,27 +95,27 @@ def strength_preserving_rand_sa(A, rewiring_iter = 10,
     rs = check_random_state(seed)
 
     n = A.shape[0]
-    s = np.sum(A, axis = 1) #strengths of A
+    s = np.sum(A, axis = 1) #strengths of A # Original Strengths
 
     #Maslov & Sneppen rewiring
     if R is None:
-        #ensuring connectedness if the original network is connected
+        #ensuring connectedness if the original network is connected (At this point connections changed, degrees preserved and strengths not necessarily preserved)
         if connected is None:
             connected = False if bct.number_of_components(A) > 1 else True
         if connected:
-            B = bct.randmio_und_connected(A, rewiring_iter, seed=seed)[0]
+            B = bct.randmio_und_connected(A, rewiring_iter, seed=seed)[0] 
         else:
             B = bct.randmio_und(A, rewiring_iter, seed=seed)[0]
     else:
         B = R.copy()
 
 
-    u, v = np.triu(B, k = 1).nonzero() #upper triangle indices
+    u, v = np.triu(B, k = 1).nonzero() #upper triangle indices # Collect all nonzero edge weights
     wts = np.triu(B, k = 1)[(u, v)] #upper triangle values
     m = len(wts)
-    sb = np.sum(B, axis = 1) #strengths of B
+    sb = np.sum(B, axis = 1) #strengths of B #Compute current strengths
 
-    energy = np.mean((s - sb)**2)
+    energy = np.mean((s - sb)**2) # Measure error
 
     energymin = energy
     wtsmin = wts.copy()
@@ -156,7 +156,7 @@ def strength_preserving_rand_sa(A, rewiring_iter = 10,
                 naccept = naccept + 1
 
         #temperature update
-        temp = temp*frac
+        temp = temp*frac  # Gradually cool down the system (Accept fewer bad moves)
         if verbose:
             print('\nstage {:d}, temp {:.5f}, best energy {:.5f}, '
                   'frac of accepted moves {:.3f}'.format(istage, temp,
