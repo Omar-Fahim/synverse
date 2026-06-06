@@ -550,6 +550,10 @@ def rewire_unsigned(df, score_name, seed, method='SA'):
         df_edge_pos = df[(df['edge_type'] == edge_type)&(df[score_name]>=0)][['source', 'target', score_name]]
         df_edge_neg =  df[(df['edge_type'] == edge_type)&(df[score_name]<0)][['source', 'target', score_name]]
         def randomize(df_edge):
+            if len(df_edge) < 2:
+                rewired_df_edge = df_edge.copy()
+                rewired_df_edge['edge_type'] = edge_type
+                return rewired_df_edge
             A, node_2_idx = dataframe_to_numpy(df_edge, score_name)
 
             if method == 'SA': #simmulated annealing
@@ -575,14 +579,21 @@ def rewire_unsigned(df, score_name, seed, method='SA'):
         print('positive edges')
         df_edge_pos['edge_type']=edge_type
         df_edge_neg['edge_type']=edge_type
-        pos_stat_df = check_diff(df_edge_pos, rewired_df_pos, score_name)
-        pos_stat_df['edge_type']=edge_type
-        pos_stat_df['sign'] = 'positive'
+        stat_dfs = []
+        if not df_edge_pos.empty:
+            pos_stat_df = check_diff(df_edge_pos, rewired_df_pos, score_name)
+            pos_stat_df['edge_type']=edge_type
+            pos_stat_df['sign'] = 'positive'
+            stat_dfs.append(pos_stat_df)
+
         print('\n\nnegative edges')
-        neg_stat_df = check_diff(df_edge_neg, rewired_df_neg, score_name)
-        neg_stat_df['edge_type'] = edge_type
-        neg_stat_df['sign'] = 'negative'
-        stat_df = pd.concat([stat_df, pos_stat_df, neg_stat_df], axis=0)
+        if not df_edge_neg.empty:
+            neg_stat_df = check_diff(df_edge_neg, rewired_df_neg, score_name)
+            neg_stat_df['edge_type'] = edge_type
+            neg_stat_df['sign'] = 'negative'
+            stat_dfs.append(neg_stat_df)
+        if stat_dfs:
+            stat_df = pd.concat([stat_df, *stat_dfs], axis=0)
 
     rewired_df = rewired_df.sample(frac=1)
     return rewired_df, stat_df

@@ -3,6 +3,7 @@ import os.path
 from models.runner import *
 from utils import *
 from feature_shuffle import shuffle_features
+from network_rewire import get_rewired_train_val, wrapper_network_rewiring_box_plot
 class BaseRunManager:
     def __init__(self, params, model_info, given_epochs, train_df, train_idx, val_idx,
                  dfeat_dict, cfeat_dict, test_df, drug_2_idx,cell_line_2_idx,out_file_prefix,file_prefix, device):
@@ -65,6 +66,30 @@ class ShuffleRunManager(BaseRunManager):
             del shuffled_cfeat_dict
 
 
+class RewireRunManager(BaseRunManager):
+    def run_wrapper(self):
+        split_file_path = self.kwargs.get('split_file_path')
+        for rewire_method in self.params.rewire_method:
+            for rand_net in range(10):
+                out_file_prefix_rewire = f'{self.out_file_prefix}_rewired_{rand_net}_{rewire_method}'
+
+                rewired_train_file = f'{split_file_path}{rand_net}all_train_rewired_{rewire_method}.tsv'
+                rewired_df, rewired_train_idx, rewired_val_idx = get_rewired_train_val(
+                    self.train_df, self.params.score_name, rewire_method,
+                    self.params.split['type'], self.params.split['val_frac'], seed=None,
+                    rewired_train_file=rewired_train_file, force_run=False)
+
+
+                # plot degree and strength distribution of nodes in rewired vs. orig networks.
+                #Uncomment the following when want to plot
+                wrapper_network_rewiring_box_plot(rewired_df, self.train_df, self.params.score_name, self.cell_line_2_idx, weighted=True,
+                                                  plot_file_prefix =f'{split_file_path}{rand_net}_{rewire_method}')
+                wrapper_network_rewiring_box_plot(rewired_df, self.train_df, self.params.score_name,
+                                                  self.cell_line_2_idx, weighted=False,
+                                                  plot_file_prefix=f'{split_file_path}{rand_net}_{rewire_method}')
+                self.execute_run(rewired_df, rewired_train_idx, rewired_val_idx, self.dfeat_dict, self.cfeat_dict, out_file_prefix_rewire)
+
+
 # Runner takes the same out_file_prefix from execute_run, so runner writes the best hyperparameter file in the location passed from execute_run
 # However, they were searching for the path in self.out_file_prefix,It was working in normal run because in normal run we do not change the file path
 
@@ -80,6 +105,7 @@ class RunManagerFactory:
         
         cls = {
             "regular": BaseRunManager,
+            "rewire": RewireRunManager,
             "shuffle": ShuffleRunManager
         }.get(train_type, BaseRunManager)
 
