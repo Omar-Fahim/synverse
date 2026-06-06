@@ -33,7 +33,7 @@ class BaseRunManager:
         if self.params.hp_tune:
             runner.find_best_hyperparam(self.params.bohb['server_type'])
 
-        hyperparam_file = self.out_file_prefix + '_best_hyperparam.txt'
+        hyperparam_file = out_file_prefix + '_best_hyperparam.txt'
         if os.path.exists(hyperparam_file):
             hyperparam, _ = extract_best_hyperparam(hyperparam_file)
             print('Found hyperparam file: ', out_file_prefix)
@@ -53,7 +53,7 @@ class BaseRunManager:
 
 class ShuffleRunManager(BaseRunManager):
     def run_wrapper(self):
-        for shuffle_no  in range (10):
+        for shuffle_no  in range (1):
             # Shuffle features for a single run
             shuffled_dfeat_dict = {**self.dfeat_dict, 'value': shuffle_features(self.dfeat_dict['value'])}
             shuffled_cfeat_dict = {**self.cfeat_dict, 'value': shuffle_features(self.cfeat_dict['value'])}
@@ -65,10 +65,8 @@ class ShuffleRunManager(BaseRunManager):
             del shuffled_cfeat_dict
 
 
-
-
-
-
+# Runner takes the same out_file_prefix from execute_run, so runner writes the best hyperparameter file in the location passed from execute_run
+# However, they were searching for the path in self.out_file_prefix,It was working in normal run because in normal run we do not change the file path
 
 
 
