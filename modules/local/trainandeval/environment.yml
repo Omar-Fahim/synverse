@@ -14,12 +14,14 @@ dependencies:
   - scikit-learn
   - transformers
   - netifaces
+  - rdkit
 
   - pip:
+      - bctpy
       - torch
       - torch_geometric>=2.7.0
       - ConfigSpace
       - hpbandster
       - pytz
       - wandb
-  
+      - seaborn 

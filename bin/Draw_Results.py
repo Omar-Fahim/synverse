@@ -2,7 +2,7 @@ import re
 import matplotlib.pyplot as plt
 
 # Path to your log file
-log_file = "/home/omar/projects/nf-core-synverse/outputs_debug/k_0.05_S_mean_mean/leave_cell_line/run_0_15/D_mol_graph_GCN_C_genex_std_omar_training_final.log"
+log_file = "/home/omar/projects/nf-core-synverse/results/trainandeval/results/k_0.05_S_mean_mean/leave_comb/run_1_6/D_smiles_Transformer_Berttokenizer_C_genex_std_shuffled_0_training_final.log"
 
 # Lists to store values
 epochs_train = []

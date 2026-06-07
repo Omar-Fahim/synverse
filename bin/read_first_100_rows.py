@@ -5,13 +5,13 @@ import random
 
 INPUT_PATH = r""  
 
-N = 100
+N = 1000
 
 
 def main():
     p = Path("/home/omar/projects/nf-core-synverse/assets/input/synergy/synergy_scores_S_mean_mean.tsv")
 
-    out = p.with_name(p.stem + "_shuffled_first100" + p.suffix)
+    out = p.with_name(p.stem + "_shuffled_first1000" + p.suffix)
 
     # Read all lines
     with p.open("r", encoding="utf-8", errors="replace") as src:

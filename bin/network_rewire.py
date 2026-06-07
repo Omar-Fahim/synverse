@@ -123,7 +123,7 @@ def strength_preserving_rand_sa(A, rewiring_iter = 10,
     if verbose:
         print('\ninitial energy {:.5f}'.format(energy))
 
-    for istage in tqdm(range(nstage), desc='annealing progress'):
+    for istage in tqdm(range(nstage), desc='annealing progress'): # Select two random edges and swap the weights
         naccept = 0
         for (e1, e2), prob in zip(rs.randint(m, size=(niter, 2)),
                                   rs.rand(niter)
@@ -142,15 +142,15 @@ def strength_preserving_rand_sa(A, rewiring_iter = 10,
                             )/n
 
             #permutation acceptance criterion
-            if (delta_energy < 0 or prob < np.e**(-(delta_energy)/temp)):
-
+            if (delta_energy < 0 or prob < np.e**(-(delta_energy)/temp)): # Check if swap helps, second term sometimes accept bad moves
+ 
                 sb[[a, b]] -= wts_change
                 sb[[c, d]] += wts_change
-                wts[[e1, e2]] = wts[[e2, e1]]
+                wts[[e1, e2]] = wts[[e2, e1]] # if swap is accepted, update the strengths
 
                 energy = np.mean((sb - s)**2)
 
-                if energy < energymin:
+                if energy < energymin: # Remember the best solution
                     energymin = energy
                     wtsmin = wts.copy()
                 naccept = naccept + 1

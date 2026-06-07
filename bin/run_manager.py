@@ -3,7 +3,8 @@ import os.path
 from models.runner import *
 from utils import *
 from feature_shuffle import shuffle_features
-from network_rewire import get_rewired_train_val, wrapper_network_rewiring_box_plot
+from network_rewire import get_rewired_train_val
+from plots.plot_utils import wrapper_network_rewiring_box_plot
 class BaseRunManager:
     def __init__(self, params, model_info, given_epochs, train_df, train_idx, val_idx,
                  dfeat_dict, cfeat_dict, test_df, drug_2_idx,cell_line_2_idx,out_file_prefix,file_prefix, device):
@@ -31,18 +32,18 @@ class BaseRunManager:
                         out_file_prefix, self.params, self.model_info,
                         self.device)
 
-        if self.params.hp_tune:
-            runner.find_best_hyperparam(self.params.bohb['server_type'])
+        # if self.params.hp_tune:
+        #     runner.find_best_hyperparam(self.params.bohb['server_type'])
 
-        hyperparam_file = out_file_prefix + '_best_hyperparam.txt'
-        if os.path.exists(hyperparam_file):
-            hyperparam, _ = extract_best_hyperparam(hyperparam_file)
-            print('Found hyperparam file: ', out_file_prefix)
-        else:
-            if self.params.use_best_hyperparam:
-                sys.exit(f"Error: hyperparameter file not found ({hyperparam_file}) but use_best_hyperparam=True")
-            else:
-                print(f'File: {hyperparam_file} not found for best hyperparam. Running with default hyperparameters.')
+        # hyperparam_file = out_file_prefix + '_best_hyperparam.txt'
+        # if os.path.exists(hyperparam_file):
+        #     hyperparam, _ = extract_best_hyperparam(hyperparam_file)
+        #     print('Found hyperparam file: ', out_file_prefix)
+        # else:
+        #     if self.params.use_best_hyperparam:
+        #         sys.exit(f"Error: hyperparameter file not found ({hyperparam_file}) but use_best_hyperparam=True")
+        #     else:
+        #         print(f'File: {hyperparam_file} not found for best hyperparam. Running with default hyperparameters.')
 
         trained_model_state, train_loss = runner.train_model_given_config(hyperparam, self.given_epochs, validation=True, save_output=True)
 
@@ -69,6 +70,7 @@ class ShuffleRunManager(BaseRunManager):
 class RewireRunManager(BaseRunManager):
     def run_wrapper(self):
         split_file_path = self.kwargs.get('split_file_path')
+        print(f"RewireRunManager: split_file_path = {split_file_path}")
         for rewire_method in self.params.rewire_method:
             for rand_net in range(10):
                 out_file_prefix_rewire = f'{self.out_file_prefix}_rewired_{rand_net}_{rewire_method}'
