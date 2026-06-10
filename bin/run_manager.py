@@ -96,6 +96,39 @@ class RewireRunManager(BaseRunManager):
 
 # Runner takes the same out_file_prefix from execute_run, so runner writes the best hyperparameter file in the location passed from execute_run
 # However, they were searching for the path in self.out_file_prefix,It was working in normal run because in normal run we do not change the file path
+class RandomizeScoreRunManager(BaseRunManager):
+    def run_wrapper(self):
+        for rand_version in range(5):
+            # randomized_train_file = f'{split_file_path}{rand_version}all_train_randomized_score.tsv'
+            randomized_df = pd.DataFrame()
+
+            edge_types = set(self.train_df['edge_type'].unique())
+            for edge_type in edge_types:
+                edge_pos_df = self.train_df[(self.train_df['edge_type'] == edge_type) & (self.train_df[self.params.score_name]>=0)].copy()
+                edge_pos_df[self.params.score_name] = edge_pos_df[self.params.score_name].sample(frac=1).values
+                edge_neg_df = self.train_df[(self.train_df['edge_type'] == edge_type) & (self.train_df[self.params.score_name]<0)].copy()
+                edge_neg_df[self.params.score_name] = edge_neg_df[self.params.score_name].sample(frac=1).values
+                randomized_df = pd.concat([randomized_df, edge_pos_df, edge_neg_df], axis=0)
+
+            def compute_deviation_of_score(all_train_df, rewired_train_df, score_name):
+                # find deviation of score among the overlapping triplets between original and rewired network
+                merged = all_train_df[['source', 'target', 'edge_type', score_name]] \
+                    .merge(
+                    rewired_train_df[['source', 'target', 'edge_type', score_name]],
+                    on=['source', 'target', 'edge_type'],
+                    suffixes=('_orig', '_rewired')
+                )
+                # 2. Compute the difference (orig minus rewired)
+                merged['score_diff'] = abs(merged[f'{score_name}_orig'] - merged[f'{score_name}_rewired'])
+                print(f'average difference btn the same triplet present in original and newired network: ',
+                      merged['score_diff'].mean())
+                return merged
+
+            deviation = compute_deviation_of_score(randomized_df, self.train_df, self.params.score_name)
+
+            # randomized_df[self.params.score_name] = randomized_df[self.params.score_name].sample(frac=1).reset_index(drop=True)
+            out_file_prefix_randomized = f'{self.out_file_prefix}_randomized_score_{rand_version}'
+            self.execute_run(randomized_df,  self.train_idx, self.val_idx, self.dfeat_dict, self.cfeat_dict, out_file_prefix_randomized)
 
 
 
@@ -110,7 +143,9 @@ class RunManagerFactory:
         cls = {
             "regular": BaseRunManager,
             "rewire": RewireRunManager,
-            "shuffle": ShuffleRunManager
+            "shuffle": ShuffleRunManager,
+            "randomized_score": RandomizeScoreRunManager,
+
         }.get(train_type, BaseRunManager)
 
         return cls(params, model_info, given_epochs, train_df, train_idx, val_idx,
