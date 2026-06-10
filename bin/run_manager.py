@@ -7,7 +7,7 @@ from network_rewire import get_rewired_train_val
 from plots.plot_utils import wrapper_network_rewiring_box_plot
 class BaseRunManager:
     def __init__(self, params, model_info, given_epochs, train_df, train_idx, val_idx,
-                 dfeat_dict, cfeat_dict, test_df, drug_2_idx,cell_line_2_idx,out_file_prefix,file_prefix, device):
+                 dfeat_dict, cfeat_dict, test_df, drug_2_idx,cell_line_2_idx,out_file_prefix,file_prefix, device,split_file_path=None,val_frac=None,test_frac=None,split_type=None):
         self.params = params
         self.model_info = model_info
         self.given_epochs = given_epochs
@@ -22,8 +22,10 @@ class BaseRunManager:
         self.file_prefix = file_prefix
         self.out_file_prefix = out_file_prefix
         self.device = device
-        
-
+        self.split_file_path = split_file_path
+        self.val_frac = val_frac
+        self.test_frac = test_frac
+        self.split_type = split_type
     def execute_run(self, train_df, train_idx, val_idx, dfeat_dict, cfeat_dict, out_file_prefix):
 
         #pipeline for training a model
@@ -69,16 +71,16 @@ class ShuffleRunManager(BaseRunManager):
 
 class RewireRunManager(BaseRunManager):
     def run_wrapper(self):
-        split_file_path = self.kwargs.get('split_file_path')
+        split_file_path = self.split_file_path
         print(f"RewireRunManager: split_file_path = {split_file_path}")
         for rewire_method in self.params.rewire_method:
-            for rand_net in range(10):
+            for rand_net in range(1):
                 out_file_prefix_rewire = f'{self.out_file_prefix}_rewired_{rand_net}_{rewire_method}'
 
                 rewired_train_file = f'{split_file_path}{rand_net}all_train_rewired_{rewire_method}.tsv'
                 rewired_df, rewired_train_idx, rewired_val_idx = get_rewired_train_val(
                     self.train_df, self.params.score_name, rewire_method,
-                    self.params.split['type'], self.params.split['val_frac'], seed=None,
+                    self.split_type, self.val_frac, seed=None,
                     rewired_train_file=rewired_train_file, force_run=False)
 
 
@@ -102,7 +104,7 @@ class RunManagerFactory:
     @staticmethod
     def get_run_manager(params, model_info, given_epochs, train_df, train_idx, val_idx,
                         dfeat_dict, cfeat_dict, test_df, drug_2_idx, cell_line_2_idx,
-                        out_file_prefix, file_prefix, device,train_type):
+                        out_file_prefix, file_prefix, device,train_type,split_file_path=None,val_frac=None,test_frac=None,split_type=None):
 
         
         cls = {
@@ -113,7 +115,7 @@ class RunManagerFactory:
 
         return cls(params, model_info, given_epochs, train_df, train_idx, val_idx,
                    dfeat_dict, cfeat_dict, test_df, drug_2_idx, cell_line_2_idx,
-                   out_file_prefix, file_prefix, device)
+                   out_file_prefix, file_prefix, device, split_file_path=split_file_path, val_frac=val_frac, test_frac=test_frac, split_type=split_type )
 
 
 

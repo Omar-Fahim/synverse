@@ -52,6 +52,8 @@ process TRAINANDEVAL {
         --params_json '${params_json}' \\
         --cell_line_2_idx '${cell_line_2_idx}' \\
         --drug_2_idx '${drug_2_idx}' \\
+        --test_frac ${test_frac} \\
+        --val_frac ${val_frac} \\
         --out_dir results
 
 
