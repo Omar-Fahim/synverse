@@ -17,7 +17,8 @@
 
 process TRAINANDEVAL {
     tag "run_${run_no}_split_${split_type}_${drug_feat}_${cell_feat}"
-    label 'process_low'
+    label 'process_high'
+    label 'process_gpu'
     publishDir path: "${params.outdir}/trainandeval", mode: params.publish_dir_mode, saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
     conda "${moduleDir}/environment.yml"

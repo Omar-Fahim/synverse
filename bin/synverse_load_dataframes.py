@@ -88,6 +88,7 @@ def main():
 
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
 
     synergy_df, dfeat_dict, cfeat_dict, drug_cell_feat_combs, drug_2_idx, cell_line_2_idx = load_dataframes(params, inputs, device)
     synergy_df.to_csv("synergy_df.tsv", sep="\t", index=False)

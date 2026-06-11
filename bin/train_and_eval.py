@@ -103,6 +103,7 @@ def main():
     split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{args.test_frac}_{args.val_frac}/run_{run_no}_{seed}/"
     split_file_path = params.split_dir + split_info_str
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
     
     run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
                              train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device,train_type=params.train_type,split_file_path=split_file_path,val_frac=args.val_frac,test_frac=args.test_frac,split_type=split_type)

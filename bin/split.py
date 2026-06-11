@@ -79,6 +79,7 @@ def main():
     # expose run_no, seed and device variables used later
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
 
     feat_str = get_feat_prefix(dfeat_dict, cfeat_dict)
     seed_str = "null" if seed is None else str(seed)
