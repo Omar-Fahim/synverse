@@ -34,18 +34,18 @@ class BaseRunManager:
                         out_file_prefix, self.params, self.model_info,
                         self.device)
 
-        if self.params.hp_tune:
-            runner.find_best_hyperparam(self.params.bohb['server_type'])
+        # if self.params.hp_tune:
+        #     runner.find_best_hyperparam(self.params.bohb['server_type'])
 
-        hyperparam_file = out_file_prefix + '_best_hyperparam.txt'
-        if os.path.exists(hyperparam_file):
-            hyperparam, _ = extract_best_hyperparam(hyperparam_file)
-            print('Found hyperparam file: ', out_file_prefix)
-        else:
-            if self.params.use_best_hyperparam:
-                sys.exit(f"Error: hyperparameter file not found ({hyperparam_file}) but use_best_hyperparam=True")
-            else:
-                print(f'File: {hyperparam_file} not found for best hyperparam. Running with default hyperparameters.')
+        # hyperparam_file = out_file_prefix + '_best_hyperparam.txt'
+        # if os.path.exists(hyperparam_file):
+        #     hyperparam, _ = extract_best_hyperparam(hyperparam_file)
+        #     print('Found hyperparam file: ', out_file_prefix)
+        # else:
+        #     if self.params.use_best_hyperparam:
+        #         sys.exit(f"Error: hyperparameter file not found ({hyperparam_file}) but use_best_hyperparam=True")
+        #     else:
+        #         print(f'File: {hyperparam_file} not found for best hyperparam. Running with default hyperparameters.')
 
         trained_model_state, train_loss = runner.train_model_given_config(hyperparam, self.given_epochs, validation=True, save_output=True)
 
