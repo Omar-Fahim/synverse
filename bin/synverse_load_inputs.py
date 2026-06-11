@@ -59,8 +59,9 @@ def main():
     repo_root = Path(__file__).resolve().parents[1] # Current_Script_File path is resolved to an absolute path, then go two levels up to get the repository root directory.
     input_settings = config["input_settings"] # Retrieves the "input_settings" section from the config dictionary.
     output_settings = config["output_settings"] # Retrieves the "output_settings" section from the config dictionary.
-
-    input_dir = resolve_path(repo_root, input_settings["input_dir"]) # Resolves the input directory path relative to the repository root and converts it to an absolute Path.
+    input_dir_str = os.path.expandvars(input_settings["input_dir"])
+    input_dir = resolve_path(repo_root, input_dir_str)
+    #input_dir = resolve_path(repo_root, input_settings["input_dir"]) # Resolves the input directory path relative to the repository root and converts it to an absolute Path.
     output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute Path.
 
     input_files  = input_settings["input_files"]
