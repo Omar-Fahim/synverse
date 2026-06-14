@@ -18,8 +18,7 @@ import groovy.json.JsonOutput
 
 process SPLITDATA {
     tag "run_${run_no}_split_${split_type}_seed_${seed}"
-    label 'process_high'
-    label 'process_gpu'
+    label 'process_low'
     
     publishDir path: "${params.outdir}/splitdata/run_${run_no}_split_${split_type}_seed_${seed}", mode: params.publish_dir_mode, saveAs: { filename -> filename.equals('versions.yml') ? null : filename }
     // TODO nf-core: See section in main README for further information regarding finding and adding container addresses to the section below.
