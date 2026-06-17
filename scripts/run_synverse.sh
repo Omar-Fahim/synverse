@@ -41,8 +41,8 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $WORK/work \
-  --outdir $WORK/results
+  -work-dir $HPCVAULT/synverse/regular_work \
+  --outdir $HPCVAULT/synverse/regular_results
 
 EXIT_CODE=$?
 echo "Pipeline finished at $(date)"
