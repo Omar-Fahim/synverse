@@ -117,8 +117,8 @@ def get_target_feat(target_df):
     # target_feat_df = target_df.pivot_table(index='pid', columns='uniprot_id', aggfunc='size', fill_value=0)
 
     # Ensure the values are only 1 or 0
-    target_feat_df = target_feat_df.applymap(lambda x: 1 if x > 0 else 0)
-
+    target_feat_df = (target_feat_df > 0).astype(int)
+    
     # Reset the index to make 'pid' a column again (optional)
     target_feat_df.reset_index(inplace=True)
     return target_feat_df
