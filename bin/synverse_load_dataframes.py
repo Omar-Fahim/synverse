@@ -7,7 +7,7 @@ import pickle
 import os
 
 #Drug Preprocess imports
-from rdkit import Chem
+#from rdkit import Chem
 from preprocessing.rwr_runner import *
 from models.model_utils import *
 from preprocessing.pretrain.embedding_generator import get_pretrained_embedding
