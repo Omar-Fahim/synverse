@@ -27,7 +27,7 @@ unzip $WORK/nf_core_synverse/dataset/inputs.zip -d $TMPDIR
 echo "[$(date +%H:%M:%S)] Dataset ready."
 ls $TMPDIR/inputs
 
-cd $WORK/synverse
+cd $HOME/synverse
 
 RESOLVED_CFG=/tmp/resolved_config_${SLURM_JOB_ID}.yaml
 envsubst < assets/testdata/Cluster_Config.yaml > $RESOLVED_CFG
