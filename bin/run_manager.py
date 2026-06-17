@@ -57,7 +57,7 @@ class BaseRunManager:
 
 class ShuffleRunManager(BaseRunManager):
     def run_wrapper(self):
-        for shuffle_no  in range (1):
+        for shuffle_no  in range (10):
             # Shuffle features for a single run
             shuffled_dfeat_dict = {**self.dfeat_dict, 'value': shuffle_features(self.dfeat_dict['value'])}
             shuffled_cfeat_dict = {**self.cfeat_dict, 'value': shuffle_features(self.cfeat_dict['value'])}
@@ -74,7 +74,7 @@ class RewireRunManager(BaseRunManager):
         split_file_path = self.split_file_path
         print(f"RewireRunManager: split_file_path = {split_file_path}")
         for rewire_method in self.params.rewire_method:
-            for rand_net in range(1):
+            for rand_net in range(10):
                 out_file_prefix_rewire = f'{self.out_file_prefix}_rewired_{rand_net}_{rewire_method}'
 
                 rewired_train_file = f'{split_file_path}{rand_net}all_train_rewired_{rewire_method}.tsv'
