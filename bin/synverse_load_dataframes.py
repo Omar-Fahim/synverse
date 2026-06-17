@@ -67,7 +67,7 @@ def load_synergy_file(path,score_name):
 def load_dataframes(params, inputs, device):
     synergy_file_path = inputs.synergy_file
     score_name = params.score_name
-    #synergy_file_path = "/home/hpc/iwbn/iwbn136h/synergy/synergy_scores_S_mean_mean_shuffled_first1000.tsv"
+    synergy_file_path = "/home/hpc/iwbn/iwbn136h/synergy/synergy_scores_S_mean_mean_shuffled_first1000.tsv"
 
     synergy_df = load_synergy_file(synergy_file_path, score_name)
     drug_pids = sorted(list(set(synergy_df['drug_1_pid']).union(set(synergy_df['drug_2_pid']))))
