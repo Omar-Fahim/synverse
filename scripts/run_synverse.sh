@@ -6,7 +6,6 @@
 #SBATCH --gres=gpu:rtx3080:1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=12
-#SBATCH --mem=72G
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
