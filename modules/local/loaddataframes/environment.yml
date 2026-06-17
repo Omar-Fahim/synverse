@@ -10,8 +10,8 @@ dependencies:
   #               Software MUST be pinned to channel (i.e. "bioconda"), version (i.e. "1.10").
   #               For Conda, the build (i.e. "h9402c20_2") must be EXCLUDED to support installation on different operating systems.
   - python=3.13
-  - pandas
-  - numpy
+  - pandas=3.0.3
+  - numpy=2.4.6
   - pyyaml
   - rdkit
   - scipy
