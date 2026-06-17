@@ -14,7 +14,7 @@ input_settings:
     vocab_file: 'drug/vocab.txt' #vocab file to convert smiles to tokens.
     net_file: 'network/STRING/9606.protein.links.v12.0.txt.gz' #file containing protein-protein interactions or edges in STRING
     prot_info_file: 'network/STRING/9606.protein.info.v12.0.txt.gz' #file containing mapping between protein_id in STRING and protein name.
-  train_type: 'regular' #type of training to perform
+  train_type: 'rewire' #type of training to perform
   split_type: 'random' #type of split to perform
   use_best_hyperparam: true #whether to use the best hyperparameters fr
   drug_features:
