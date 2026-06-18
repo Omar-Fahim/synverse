@@ -1,9 +1,10 @@
 #!/bin/bash -l
-#SBATCH --job-name=synverse_rtx
+#SBATCH --job-name=synverse_a100
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=24:00:00
-#SBATCH --gres=gpu:rtx3080:1
+#SBATCH --partition=a100
+#SBATCH --gres=gpu:a100:1
 # SBATCH --partition=v100
 # SBATCH --gres=gpu:v100:1
 #SBATCH --ntasks=1
@@ -41,8 +42,8 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $HPCVAULT/synverse/regular_work_rtx \
-  --outdir $HPCVAULT/synverse/regular_results_rtx
+  -work-dir $HPCVAULT/synverse/regular_work_a100 \
+  --outdir $HPCVAULT/synverse/regular_results_a100
 
 EXIT_CODE=$?
 echo "Pipeline finished at $(date)"
