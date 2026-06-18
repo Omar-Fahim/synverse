@@ -7,7 +7,7 @@
 # SBATCH --partition=v100
 # SBATCH --gres=gpu:v100:1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=8
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
