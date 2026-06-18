@@ -7,7 +7,7 @@
 # SBATCH --partition=v100
 # SBATCH --gres=gpu:v100:1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=8
+#SBATCH --cpus-per-task=10
 #SBATCH --export=NONE
 
 unset SLURM_EXPORT_ENV
@@ -41,8 +41,8 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $HPCVAULT/synverse/rewire_work \
-  --outdir $HPCVAULT/synverse/rewire_results
+  -work-dir $HPCVAULT/synverse/regular_work \
+  --outdir $HPCVAULT/synverse/regular_results
 
 EXIT_CODE=$?
 echo "Pipeline finished at $(date)"

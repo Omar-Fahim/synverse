@@ -14,7 +14,7 @@ input_settings:
     vocab_file: 'drug/vocab.txt' #vocab file to convert smiles to tokens.
     net_file: 'network/STRING/9606.protein.links.v12.0.txt.gz' #file containing protein-protein interactions or edges in STRING
     prot_info_file: 'network/STRING/9606.protein.info.v12.0.txt.gz' #file containing mapping between protein_id in STRING and protein name.
-  train_type: 'rewire' #type of training to perform
+  train_type: 'regular' #type of training to perform
   split_type: 'random' #type of split to perform
   use_best_hyperparam: true #whether to use the best hyperparameters fr
   drug_features:
@@ -34,9 +34,6 @@ input_settings:
     - name: 'ECFP_4' #ECFP fingerprints
       use: [  true, false ]
 
-    - name: 'MFP' #Morgan fingerprint
-      use: [ true, false ]
-
     - name: 'mol_graph' #molecular graph of drug derived from SMILES
       encoder: 'GCN'
       use: [ true, false ]
@@ -53,10 +50,7 @@ input_settings:
       use: [ true, false ]
 
   cell_line_features:
-    - name: 'genex_lincs_1000' #expression of landmark genes only
-      norm: 'std'
-      use: [ true, False ]
-
+    
     - name: 'genex' #expression of all available genes
       norm: 'std'
       use: [ true, False ]
@@ -104,7 +98,7 @@ input_settings:
 
   autoencoder_dims:  [[1024, 512], [512, 256], [256, 128], [256, 64]]
   batch_size: 4096
-  epochs: 1500
+  epochs: 375
 
 
   splits: #contains the split names you want to
@@ -125,7 +119,7 @@ input_settings:
       val_frac: 0.25
 
   start_run: 1 
-  end_run: 5
+  end_run: 2
   seeds:
       random: [0, 1, 2, 3, 4]
       leave_comb: [5, 6, 7, 8, 9]
