@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --job-name=synverse
+#SBATCH --job-name=synverse_rtx
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=24:00:00
@@ -41,8 +41,8 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $HPCVAULT/synverse/regular_work \
-  --outdir $HPCVAULT/synverse/regular_results
+  -work-dir $HPCVAULT/synverse/regular_work_rtx \
+  --outdir $HPCVAULT/synverse/regular_results_rtx
 
 EXIT_CODE=$?
 echo "Pipeline finished at $(date)"
