@@ -20,11 +20,11 @@ torch.set_default_dtype(torch.float32)
 class HP_Worker(Worker):
     # def __init__(self, train_val_dataset, train_idx, val_idx, input_dim=None, batch_size=4096,
     #             check_freq=2, tolerance=10,n_folds=5,is_wandb=False, device='cpu',sleep_interval=0, **kwargs):
-    def __init__(self, runner_instance, sleep_interval=0, device=None, **kwargs):
+    def __init__(self, runner_instance, sleep_interval=0, **kwargs):
         super().__init__(**kwargs)
         self.runner = runner_instance
         self.sleep_interval = sleep_interval
-        self.device = device or runner_instance.device
+        
 
     def compute(self, config, budget, working_directory, *args, **kwargs):
         """
@@ -50,10 +50,10 @@ class HP_Worker(Worker):
             train_loader = DataLoader(train_subsampler, batch_size=self.runner.batch_size, shuffle=True)
             val_loader = DataLoader(val_subsampler, batch_size=self.runner.batch_size, shuffle=False)
 
-            model, optimizer, criterion = self.runner.init_model(config, device=self.device)
+            model, optimizer, criterion = self.runner.init_model(config)
 
             best_model_state, val_losses[fold],_, req_epochs[fold] = self.runner.train_model(model, optimizer, criterion, train_loader,
-                budget, self.runner.check_freq, self.runner.tolerance, self.runner.is_wandb, self.device, early_stop=True, val_loader=val_loader)
+                budget, self.runner.check_freq, self.runner.tolerance, self.runner.is_wandb, self.runner.device, early_stop=True, val_loader=val_loader)
 
             time.sleep(self.sleep_interval)
 

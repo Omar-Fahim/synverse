@@ -81,11 +81,10 @@ class Runner(ABC):
         self.log_file = self.out_file_prefix + '_training.log'
 
     def init_model(self, config, device=None):
-        device = device or self.device
         model = SynVerseModel(self.drug_encoder_info, self.cell_encoder_info,
                               self.dfeat_dim_dict, self.cfeat_dim_dict,self.dfeat_file_dict, self.cfeat_file_dict,
                               self.drug_feat_encoder_mapping, self.cell_feat_encoder_mapping,
-                              config, device).to(device)
+                              config, self.device).to(self.device)
         ## Wrap the model for parallel processing if multiple gpus are available
         # if torch.cuda.is_available() and torch.cuda.device_count() > 1:
         #     print(f"Using {torch.cuda.device_count()} GPUs!")
@@ -126,15 +125,6 @@ class Runner(ABC):
 
 
         if server_type == 'local':
-            n_workers = int(self.bohb_params.get('n_workers', 1))
-            if self.device.type == 'cuda':
-                available_gpus = torch.cuda.device_count()
-                if n_workers > available_gpus:
-                    raise ValueError(f"Requested {n_workers} BOHB workers but only {available_gpus} CUDA devices are visible.")
-                worker_devices = [torch.device(f'cuda:{gpu_id}') for gpu_id in range(n_workers)]
-            else:
-                worker_devices = [self.device for _ in range(n_workers)]
-
             # get the used specified setting here about wandb and BOHB
             run_id = self.bohb_params['run_id']
             # Step 2: Start a worker #Nure: Model specific
@@ -160,15 +150,11 @@ class Runner(ABC):
             NS = hpns.NameServer(run_id=run_id, host=name_server, port=0)
             ns_host, ns_port = NS.start()
 
+            # w = self.worker_cls(self, sleep_interval=0, nameserver=name_server, run_id=run_id)
+            w = self.worker_cls(self, sleep_interval=0, nameserver=ns_host, nameserver_port=ns_port, run_id=run_id)
 
-            workers = []
-            for worker_id, worker_device in enumerate(worker_devices):
-                w = self.worker_cls(self, sleep_interval=0, device=worker_device,
-                                    nameserver=ns_host, nameserver_port=ns_port,
-                                    run_id=run_id, id=worker_id)
-                w.run(background=True)
-                workers.append(w)
-                print(f"Started BOHB worker {worker_id} on {worker_device}")
+            w.run(background=True)
+            
 
             # Step 3: Run an optimizer
             # The run method will return the `Result` that contains all runs performed.
@@ -177,12 +163,12 @@ class Runner(ABC):
             #             run_id=run_id, nameserver=name_server,
             #             result_logger=self.result_logger,
             #             min_budget=min_budget, max_budget=max_budget)
-            bohb = BOHB(configspace=self.worker_cls.get_configspace(self.model_info),
+            bohb = BOHB(configspace=w.get_configspace(self.model_info),
                         run_id=run_id, nameserver=ns_host,
                         nameserver_port=ns_port,
                         result_logger=self.result_logger,
                         min_budget=min_budget, max_budget=max_budget)
-            res = bohb.run(n_iterations=n_iterations, min_n_workers=n_workers)
+            res = bohb.run(n_iterations=n_iterations)
 
         elif server_type == 'cluster':
             n_workers = kwargs.get('n_workers')
