@@ -74,8 +74,8 @@ class Runner(ABC):
         self.params=params
         self.model_info = model_info
 
-        self.check_freq = 2 #previously ran with 2 , 3
-        self.tolerance = 45 #previously ran with 15, 30
+        self.check_freq = 1 #previously ran with 2 , 3
+        self.tolerance = 10 #previously ran with 15, 30
         self.batch_size = int(params.batch_size)
 
         self.log_file = self.out_file_prefix + '_training.log'
@@ -173,7 +173,7 @@ class Runner(ABC):
         elif server_type == 'cluster':
             n_workers = kwargs.get('n_workers')
             worker = kwargs.get('worker')
-            run_id = kwargs.get('run_id')
+            run_id = self.bohb_params['run_id']
             # # Step 2: Start a worker #Nure: Model specific
             # formatted_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             # run_id = f'{run_id}_{formatted_time}'

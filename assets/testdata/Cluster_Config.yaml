@@ -38,6 +38,9 @@ input_settings:
       encoder: 'GCN'
       use: [ true, false ]
 
+    - name: 'MFP' #Morgan fingerprint
+      use: [ true, false ]
+
     - name: 'smiles' #SMILES string
       encoder: 'Transformer_Berttokenizer' #options: 'Transformer','Transformer_Berttokenizer', 'SPMM', 'mole','kpgt'
       use: [ true, false ]
@@ -55,6 +58,10 @@ input_settings:
       norm: 'std'
       use: [ true, False ]
 
+    - name: 'genex_lincs_1000' #expression of landmark genes only
+      norm: 'std'
+      use: [ true, False ]
+      
     - name: 'c1hot'
       use: [true, False]
     
@@ -98,7 +105,7 @@ input_settings:
 
   autoencoder_dims:  [[1024, 512], [512, 256], [256, 128], [256, 64]]
   batch_size: 4096
-  epochs: 375
+  epochs: 60
 
 
   splits: #contains the split names you want to
@@ -119,7 +126,7 @@ input_settings:
       val_frac: 0.25
 
   start_run: 1 
-  end_run: 2
+  end_run: 3
   seeds:
       random: [0, 1, 2, 3, 4]
       leave_comb: [5, 6, 7, 8, 9]
@@ -144,9 +151,9 @@ input_settings:
 
   hp_tune: true #True if tuning hyoerparam else False.
   bohb: #params for Bayesian Optomization Based Hyperparameter Tuning.
-    min_budget: 27
-    max_budget: 729
-    n_iterations: 3
+    min_budget: 10
+    max_budget: 60
+    n_iterations: 2
     run_id : 'synverse'
     server_type: 'local'
 
