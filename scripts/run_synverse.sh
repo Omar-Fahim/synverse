@@ -42,7 +42,7 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $WORK/synverse/regular_work_a100 \
+  -work-dir $HPCVAULT/synverse/regular_work_a100_2 \
   --outdir $WORK/synverse/regular_results_a100
 
 EXIT_CODE=$?
