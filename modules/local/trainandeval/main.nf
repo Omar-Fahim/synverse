@@ -54,7 +54,7 @@ process TRAINANDEVAL {
         SELECTED_GPU=""
 
         for GPU_ID in 0 1; do # Here , we will loop over the available GPUs
-            COUNT=\$(ls "\$GPU_LOCK_DIR"/gpu_\${GPU_ID}_*.lock 2>/dev/null | wc -l) # Count how many processes on this GPU.
+            COUNT=\$(find "\$GPU_LOCK_DIR" -maxdepth 1 -name "gpu_\${GPU_ID}_*.lock" -type f | wc -l)
 
             if [ "\$COUNT" -lt "\$GPU_MAX_PROCS_PER_GPU" ]; then # If this GPU has free capacity, select it and create its reservation file and save its path
                 SELECTED_GPU="\$GPU_ID"
