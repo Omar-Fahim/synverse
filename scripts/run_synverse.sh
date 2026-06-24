@@ -1,10 +1,10 @@
 #!/bin/bash -l
-#SBATCH --job-name=synverse_a100_2
+#SBATCH --job-name=synverse_a100_regular_2_GPUs
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=24:00:00
 #SBATCH --partition=a100
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:a100:2
 # SBATCH --partition=v100
 # SBATCH --gres=gpu:v100:1
 #SBATCH --ntasks=1
@@ -39,11 +39,15 @@ echo "[$(date +%H:%M:%S)] Resolved config input_dir line:"
 grep input_dir $RESOLVED_CFG
 
 echo "[$(date +%H:%M:%S)] Starting Nextflow..."
+mkdir -p "$WORK/synverse/regular_work_${SLURM_JOB_ID}"
+mkdir -p "$WORK/synverse/regular_results_${SLURM_JOB_ID}"
+
+
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $WORK/synverse/regular_work_a100 \
-  --outdir $WORK/synverse/regular_results_a100
+  -work-dir $WORK/synverse/regular_work_${SLURM_JOB_ID} \
+  --outdir $WORK/synverse/regular_results_${SLURM_JOB_ID} \
   -c conf/cluster_gpu.config
 
 EXIT_CODE=$?
