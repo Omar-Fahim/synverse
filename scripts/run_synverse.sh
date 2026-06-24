@@ -39,8 +39,7 @@ echo "[$(date +%H:%M:%S)] Resolved config input_dir line:"
 grep input_dir $RESOLVED_CFG
 
 echo "[$(date +%H:%M:%S)] Starting Nextflow..."
-mkdir -p "$HPCVAULT/synverse/regular_work_${SLURM_JOB_ID}"
-mkdir -p "$HPCVAULT/synverse/regular_results_${SLURM_JOB_ID}"
+
 
 
 nextflow run . \

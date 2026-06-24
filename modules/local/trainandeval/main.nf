@@ -65,7 +65,7 @@ process TRAINANDEVAL {
                 break
             fi
         done
-    ) 200>>"$GPU_LOCK_DIR/select.lock"
+    ) ) 200>>"\$GPU_LOCK_DIR/select.lock"
 
     if [ -f gpu_id.selected ]; then
         GPU_ID=\$(cat gpu_id.selected)
