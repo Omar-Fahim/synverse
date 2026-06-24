@@ -45,6 +45,7 @@ nextflow run . \
   --input $RESOLVED_CFG \
   -work-dir $WORK/synverse/regular_work_a100 \
   --outdir $WORK/synverse/regular_results_a100
+  -c conf/cluster_gpu.config
 
 EXIT_CODE=$?
 echo "Pipeline finished at $(date)"
