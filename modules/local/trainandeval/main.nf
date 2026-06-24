@@ -49,8 +49,7 @@ process TRAINANDEVAL {
 
 
 
-    echo "[$(date)] Task ${task.index}: starting GPU selection"
-
+    echo "[\$(date)] Task ${task.index}: starting GPU selection"
     while true; do
     (
         flock -x 200 # Here the process can acquire an exclusive lock so only one process can choose a GPU at a time to prevent race conditions
@@ -86,7 +85,7 @@ process TRAINANDEVAL {
     done
 
     trap 'rm -f "\$GPU_RES_FILE"' EXIT
-    echo "[$(date)] About to start train_and_eval.py"
+    echo "[\$(date)] About to start train_and_eval.py"
 
     train_and_eval.py \\
         --run_no ${run_no} \\
