@@ -39,15 +39,15 @@ echo "[$(date +%H:%M:%S)] Resolved config input_dir line:"
 grep input_dir $RESOLVED_CFG
 
 echo "[$(date +%H:%M:%S)] Starting Nextflow..."
-mkdir -p "$WORK/synverse/regular_work_${SLURM_JOB_ID}"
-mkdir -p "$WORK/synverse/regular_results_${SLURM_JOB_ID}"
+mkdir -p "$HPCVAULT/synverse/regular_work_${SLURM_JOB_ID}"
+mkdir -p "$HPCVAULT/synverse/regular_results_${SLURM_JOB_ID}"
 
 
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $WORK/synverse/regular_work_${SLURM_JOB_ID} \
-  --outdir $WORK/synverse/regular_results_${SLURM_JOB_ID} \
+  -work-dir $HPCVAULT/synverse/regular_work_${SLURM_JOB_ID} \
+  --outdir $HPCVAULT/synverse/regular_results_${SLURM_JOB_ID} \
   -c conf/cluster_gpu.config
 
 EXIT_CODE=$?
