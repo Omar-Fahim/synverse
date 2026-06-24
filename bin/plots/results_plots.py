@@ -860,7 +860,12 @@ def generate_plots(params):
 
 
 def main(params, **kwargs):
-    result_dir = f'/{params.out_dir}/k_{params.abundance}_{params.score_name}/'
+    result_dir = os.path.join(
+    params.out_dir,
+    "trainandeval",
+    "results",
+    f"k_{params.abundance}_{params.score_name}",
+)
     if kwargs.get('parse'):
         parse_output_files(result_dir)
     if kwargs.get('plot'):
@@ -869,5 +874,5 @@ def main(params, **kwargs):
 if __name__ == '__main__':
     config_map, kwargs = parse_args()
     # parse input_files and params from config_file. If some params are overlapping across config_map and kwargs, then prioritize kwargs.
-    _, params = parse_config(config_map, **kwargs)
+    _, params = parse_config(config_map)
     main(params, **kwargs)
