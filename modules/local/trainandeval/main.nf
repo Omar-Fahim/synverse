@@ -44,7 +44,7 @@ process TRAINANDEVAL {
 
 
     GPU_MAX_PROCS_PER_GPU=3  # this is the maximum number of processes that can run on a single GPU at the same time.
-    GPU_LOCK_DIR="/home/vault/iwbn/iwbn136h/synverse/gpu_locks" # Directory where GPU reservation lock files are stored
+    GPU_LOCK_DIR="/home/woody/iwbn/iwbn136h/synverse/gpu_locks" # Directory where GPU reservation lock files are stored
     mkdir -p "\$GPU_LOCK_DIR"
 
     while true; do

@@ -46,8 +46,8 @@ nextflow run . \
   -resume \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $HPCVAULT/synverse/regular_work \
-  --outdir $HPCVAULT/synverse/regular_results \
+  -work-dir $WORK/synverse/regular_work \
+  --outdir $WORK/synverse/regular_results \
   -c conf/cluster_gpu.config \
   -with-report report_${SLURM_JOB_ID}.html \
   -with-trace trace_${SLURM_JOB_ID}.txt \
