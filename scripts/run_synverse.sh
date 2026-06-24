@@ -48,7 +48,10 @@ nextflow run . \
   --input $RESOLVED_CFG \
   -work-dir $HPCVAULT/synverse/regular_work_${SLURM_JOB_ID} \
   --outdir $HPCVAULT/synverse/regular_results_${SLURM_JOB_ID} \
-  -c conf/cluster_gpu.config
+  -c conf/cluster_gpu.config \
+  -with-report report_${SLURM_JOB_ID}.html \
+  -with-trace trace_${SLURM_JOB_ID}.txt \
+  -with-timeline timeline_${SLURM_JOB_ID}.html
 
 EXIT_CODE=$?
 echo "Pipeline finished at $(date)"
