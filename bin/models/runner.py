@@ -266,9 +266,9 @@ class Runner(ABC):
 
             if save_output:
                 # save the best model
-                model_file = self.out_file.replace('.txt', '_model.pth')
-                os.makedirs(os.path.dirname(model_file), exist_ok=True)
-                torch.save(best_model_state, model_file)
+                # model_file = self.out_file.replace('.txt', '_model.pth')
+                # os.makedirs(os.path.dirname(model_file), exist_ok=True)
+                # torch.save(best_model_state, model_file)
 
                 #save train_loss
                 # loss_file = self.out_file.replace('.txt', '_train_loss.txt')
@@ -312,9 +312,9 @@ class Runner(ABC):
                     file.write(f'val_loss: {val_loss[fold]}\n\n')
 
                     # save the best model trained only on training split
-                    model_file = self.out_file.replace('.txt', f'_val_true_model_{fold}.pth')
-                    os.makedirs(os.path.dirname(model_file), exist_ok=True)
-                    torch.save(best_model_state, model_file)
+                    # model_file = self.out_file.replace('.txt', f'_val_true_model_{fold}.pth')
+                    # os.makedirs(os.path.dirname(model_file), exist_ok=True)
+                    # torch.save(best_model_state, model_file)
 
         return best_model_state, train_loss
 
