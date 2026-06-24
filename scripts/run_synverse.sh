@@ -44,6 +44,7 @@ mkdir -p "$HPCVAULT/synverse/regular_results_${SLURM_JOB_ID}"
 
 
 nextflow run . \
+  -resume \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
   -work-dir $HPCVAULT/synverse/regular_work_${SLURM_JOB_ID} \

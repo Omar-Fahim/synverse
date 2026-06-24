@@ -34,11 +34,53 @@ process TRAINANDEVAL {
     path "versions.yml", emit: versions
     path "results/**", emit: results
     
-
+   
     
 
     script:
     """
+
+
+
+
+    GPU_MAX_PROCS_PER_GPU=3  # this is the maximum number of processes that can run on a single GPU at the same time.
+    GPU_LOCK_DIR="\${PWD}/../gpu_locks" # Directory where GPU reservation lock files are stored
+    mkdir -p "\$GPU_LOCK_DIR"
+
+    while true; do
+    (
+        flock -x 200 # Here the process can acquire an exclusive lock so only one process can choose a GPU at a time to prevent race conditions
+
+        SELECTED_GPU=""
+
+        for GPU_ID in 0 1; do # Here , we will loop over the available GPUs
+            COUNT=\$(ls "\$GPU_LOCK_DIR"/gpu_\${GPU_ID}_*.lock 2>/dev/null | wc -l) # Count how many processes on this GPU.
+
+            if [ "\$COUNT" -lt "\$GPU_MAX_PROCS_PER_GPU" ]; then # If this GPU has free capacity, select it and create its reservation file and save its path
+                SELECTED_GPU="\$GPU_ID"
+                RES_FILE="\$GPU_LOCK_DIR/gpu_\${GPU_ID}_task_${task.index}.lock"
+                touch "\$RES_FILE"
+                echo "\$GPU_ID" > gpu_id.selected
+                echo "\$RES_FILE" > gpu_reservation_file.selected
+                break
+            fi
+        done
+    ) 200>"\$GPU_LOCK_DIR/select.lock"
+
+    if [ -f gpu_id.selected ]; then
+        GPU_ID=\$(cat gpu_id.selected)
+        GPU_RES_FILE=\$(cat gpu_reservation_file.selected)
+        export CUDA_VISIBLE_DEVICES="\$GPU_ID"
+        echo "Using physical GPU \$GPU_ID"
+        break
+    fi
+
+    echo "No GPU slot available. Waiting..."
+    sleep 60
+    done
+
+    trap 'rm -f "\$GPU_RES_FILE"' EXIT
+
     train_and_eval.py \\
         --run_no ${run_no} \\
         --split_type ${split_type} \\
