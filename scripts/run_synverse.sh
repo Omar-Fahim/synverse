@@ -25,12 +25,17 @@ export https_proxy=http://proxy.nhr.fau.de:80
 module load python/3.12-conda
 conda activate nextflow25
 
-echo "[$(date +%H:%M:%S)] Extracting dataset..."
-unzip $WORK/nf_core_synverse/dataset/inputs.zip -d $TMPDIR
-echo "[$(date +%H:%M:%S)] Dataset ready."
-ls $TMPDIR/inputs
+INPUT_DIR="$TMPDIR/inputs_${SLURM_JOB_ID}"
 
-cd $HOME/synverse
+mkdir -p "$INPUT_DIR"
+
+echo "[$(date +%H:%M:%S)] Extracting dataset..."
+unzip "$WORK/nf_core_synverse/dataset/inputs.zip" -d "$INPUT_DIR"
+echo "[$(date +%H:%M:%S)] Dataset ready."
+
+ls "$INPUT_DIR"
+
+cd $HOME/synverse_two/synverse
 
 RESOLVED_CFG=/tmp/resolved_config_${SLURM_JOB_ID}.yaml
 envsubst < assets/testdata/Cluster_Config.yaml > $RESOLVED_CFG
