@@ -43,7 +43,7 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 
 
 nextflow run . \
-  -resume \
+  
   -profile conda,gpu \
   --input $RESOLVED_CFG \
   -work-dir $WORK/synverse/regular_work \
