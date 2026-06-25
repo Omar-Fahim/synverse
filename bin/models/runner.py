@@ -257,7 +257,7 @@ class Runner(ABC):
         if not validation: #train model with both training and validation data
             # load dataset
             model, optimizer, criterion = self.init_model(config)
-            train_loader = DataLoader(self.triplets_scores_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, pin_memory=True)
+            train_loader = DataLoader(self.triplets_scores_dataset, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
             # train model using the whole training data (including validation dataset)
             best_model_state,_,train_loss, _ = self.train_model(model, optimizer, criterion, train_loader,
                                             best_n_epochs, self.check_freq,
@@ -298,8 +298,8 @@ class Runner(ABC):
                 train_subsampler = Subset(self.triplets_scores_dataset, fold_train_idx)
                 val_subsampler = Subset(self.triplets_scores_dataset, fold_val_idx)
 
-                train_loader = DataLoader(train_subsampler, batch_size=self.batch_size, shuffle=True, num_workers=4, pin_memory=True)
-                val_loader = DataLoader(val_subsampler, batch_size=self.batch_size, shuffle=False, num_workers=4, pin_memory=True)
+                train_loader = DataLoader(train_subsampler, batch_size=self.batch_size, shuffle=True, num_workers=8, pin_memory=True)
+                val_loader = DataLoader(val_subsampler, batch_size=self.batch_size, shuffle=False, num_workers=8, pin_memory=True)
 
                 best_model_state, val_loss[fold], train_loss[fold], req_epochs[fold] = self.train_model(model, optimizer,
                                     criterion, train_loader, best_n_epochs, self.check_freq,self.tolerance,
@@ -470,7 +470,7 @@ class Runner(ABC):
         '''
         :return:
         '''
-        test_loader = DataLoader(self.get_triplets_score_dataset(test_df, score_name=self.score_name), batch_size=4096, shuffle=True, num_workers=4, pin_memory=True)
+        test_loader = DataLoader(self.get_triplets_score_dataset(test_df, score_name=self.score_name), batch_size=4096, shuffle=True, num_workers=8, pin_memory=True)
         # evaluate model on test dataset
         model, optimizer, criterion = self.init_model(config)
         model.load_state_dict(best_model_state)

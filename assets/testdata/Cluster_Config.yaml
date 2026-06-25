@@ -1,6 +1,6 @@
 input_settings:
   score_name: 'S_mean_mean' #which synergy score to predict. Another option is 'synergy_loewe_mean'
-  input_dir: "$INPUT_DIR" #Base input directory
+  input_dir: "$TMPDIR/inputs" #Base input directory
   input_files:
     synergy_file: 'synergy/synergy_scores_S_mean_mean.tsv' #tab separated file containing triplets with synergy score with columns named 'drug_1_pid', 'drug_2_pid', 'cell_line_name', score_name (same as the value of variable score_name)
     maccs_file: 'drug/MACCS.tsv' #tab separated file containing MACCS key values of drug. Columns: ['pid', 'MACCS_0', 'MACCS_1',..,'MACCS_166']
