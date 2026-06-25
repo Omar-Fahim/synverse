@@ -1,10 +1,10 @@
 #!/bin/bash -l
-#SBATCH --job-name=synverse_a100_regular_1_GPUs
+#SBATCH --job-name=synverse_a100_regular_2_GPUs
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=24:00:00
 #SBATCH --partition=a100
-#SBATCH --gres=gpu:a100:1
+#SBATCH --gres=gpu:a100:2
 # SBATCH --partition=v100
 # SBATCH --gres=gpu:v100:1
 #SBATCH --ntasks=1
@@ -35,7 +35,7 @@ echo "[$(date +%H:%M:%S)] Dataset ready."
 
 ls "$INPUT_DIR"
 
-cd $HOME/synverse_two/synverse
+cd $HOME/synverse
 
 RESOLVED_CFG=/tmp/resolved_config_${SLURM_JOB_ID}.yaml
 envsubst < assets/testdata/Cluster_Config.yaml > $RESOLVED_CFG
@@ -51,8 +51,8 @@ nextflow run . \
   -resume \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $HPCVAULT/synverse/regular_work \
-  --outdir $HPCVAULT/synverse/regular_results \
+  -work-dir $HPCWORK/synverse/regular_work \
+  --outdir $HPCWORK/synverse/regular_results \
   -c conf/cluster_gpu.config \
   -with-report report_${SLURM_JOB_ID}.html \
   -with-trace trace_${SLURM_JOB_ID}.txt \
