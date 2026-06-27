@@ -47,6 +47,7 @@ class Params:
     train_type: str  
     use_best_hyperparam: bool = False  
     split_type: str = ''  # Added split_type to Params
+    cv: Any = None
 
 
 def parse_config(config_map):
@@ -102,7 +103,8 @@ def parse_config(config_map):
         seeds=input_settings.get('seeds', {}),
         train_type=input_settings.get('train_type', 'regular'),
         use_best_hyperparam=input_settings.get('use_best_hyperparam', False),
-        split_type=input_settings.get('split_type', '')
+        split_type=input_settings.get('split_type', ''),
+        cv=input_settings.get('cv', {'enabled': False, 'n_folds': 5})
     )
 
     # Checks
