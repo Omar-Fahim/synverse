@@ -2,13 +2,13 @@
 import pandas as pd
 import argparse, os, pickle
 import copy
-from utils import wrapper_test_train_val, remove_self_loop_from_splits
+from utils import wrapper_test_train_val, remove_self_loop_from_splits,split_type_map
 import json
 from pathlib import Path
 from preprocessing.preprocess import post_split_processing
 from utils import get_feat_prefix
 import torch
-#Read run_no,split_type,Seed from command line arguments
+from graph_split import split_cv
 def parse_args():
     parser = argparse.ArgumentParser(description="Split dataset into train, validation, and test sets.")
     parser.add_argument("--run_no", type=int, required=True, help="Run number for reproducibility.")
@@ -64,7 +64,41 @@ def main():
     # Perform the split using the wrapper function
     
     
-    test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(copy.deepcopy(synergy_df), split_type, test_frac, val_frac, seed = seed)
+    #test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(copy.deepcopy(synergy_df), split_type, test_frac, val_frac, seed = seed)
+    cv_settings = getattr(params, 'cv', {'enabled': False, 'n_folds': 5})
+    cv_enabled = cv_settings.get('enabled', False)
+
+    if params.train_type == 'regular' and cv_enabled:
+        n_folds = int(cv_settings.get('n_folds', 5))
+        fold_no = int(args.run_no)
+
+        train_folds, test_folds = split_cv(
+            copy.deepcopy(synergy_df),
+            split_type_map[split_type],
+            n_folds=n_folds,
+            seed=seed
+        )
+
+        test_df = synergy_df.iloc[test_folds[fold_no]].copy()
+        all_train_df = synergy_df.iloc[train_folds[fold_no]].reset_index(drop=True)
+
+        train_idx = {0: list(range(len(all_train_df)))}
+        val_idx = {0: []}
+
+    else:
+        test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(
+            copy.deepcopy(synergy_df),
+            split_type,
+            test_frac,
+            val_frac,
+            seed=seed
+        )
+    
+
+
+
+
+
     # Remove self-loops from the splits
     test_df, all_train_df, train_idx, val_idx = remove_self_loop_from_splits( test_df, all_train_df, train_idx, val_idx)
     # Select only the relevant columns for the output
