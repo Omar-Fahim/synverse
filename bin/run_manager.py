@@ -46,8 +46,12 @@ class BaseRunManager:
         #         sys.exit(f"Error: hyperparameter file not found ({hyperparam_file}) but use_best_hyperparam=True")
         #     else:
         #         print(f'File: {hyperparam_file} not found for best hyperparam. Running with default hyperparameters.')
+        cv_settings = getattr(self.params, 'cv', {'enabled': False})
+        cv_enabled = cv_settings.get('enabled', False)
 
-        trained_model_state, train_loss = runner.train_model_given_config(hyperparam, self.given_epochs, validation=True, save_output=True)
+        use_validation = not (self.params.train_type == 'regular' and cv_enabled)
+
+        trained_model_state, train_loss = runner.train_model_given_config(hyperparam, self.given_epochs, validation=use_validation, save_output=True)
 
         #testing a model
         runner.get_test_score(self.test_df, trained_model_state, hyperparam, save_output=True, file_prefix=self.file_prefix)

@@ -105,8 +105,13 @@ def main():
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
     
+    cv_settings = getattr(params, 'cv', {'enabled': False})
+    cv_enabled = cv_settings.get('enabled', False)
+
+    file_prefix = '_cv_' if params.train_type == 'regular' and cv_enabled else '_val_true_'
+
     run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
-                             train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device,train_type=params.train_type,split_file_path=split_file_path,val_frac=args.val_frac,test_frac=args.test_frac,split_type=split_type)
+                             train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, file_prefix, device,train_type=params.train_type,split_file_path=split_file_path,val_frac=args.val_frac,test_frac=args.test_frac,split_type=split_type)
     run_manager.run_wrapper()
 
 
