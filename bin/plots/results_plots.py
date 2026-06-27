@@ -726,9 +726,9 @@ def generate_plots(params):
                 df_avg = aggregate_scores(result_df)
                 df_avg.to_csv(f'{result_dir}/{score_name_str}_{split_type}_aggreagred.tsv', sep='\t')
 
-                significance_df = compute_average_and_significance(copy.deepcopy(result_df), metric, alt=alt)
-                significance_df.to_csv(
-                    f'{result_dir}/significance_baseline_diff_{score_name_str}_{split_type}_{metric}.tsv', sep='\t')
+                # significance_df = compute_average_and_significance(copy.deepcopy(result_df), metric, alt=alt)
+                # significance_df.to_csv(
+                #     f'{result_dir}/significance_baseline_diff_{score_name_str}_{split_type}_{metric}.tsv', sep='\t')
 
 
                 #Kruskal test
@@ -740,6 +740,10 @@ def generate_plots(params):
                 # get feature_filter wise one_hot model's  performance
                 df_1hot = df_avg[df_avg['Model'] == 'One hot']
                 ft_filt_wise_1hot = dict(zip(df_1hot['feature_filter'], df_1hot[f'{metric}_median']))
+                if not df_1hot.empty:
+                 global_1hot_median = df_1hot[f'{metric}_median'].median()
+                for feature_filter in result_df['feature_filter'].dropna().unique():
+                    ft_filt_wise_1hot.setdefault(feature_filter, global_1hot_median)
 
                 wrapper_plot_model_performance_subplots(copy.deepcopy(result_df),ft_filt_wise_1hot, metric=metric, y_label=y_label, title=split_type, orientation=orientation, out_file_prefix =f'{result_dir}/plot/{orientation}/{score_name_str}_{split_type}_{metric}')
 
@@ -861,14 +865,15 @@ def generate_plots(params):
 
 def main(params, **kwargs):
     result_dir = os.path.join(
-    params.out_dir,
-    "trainandeval",
-    "results",
-    f"k_{params.abundance}_{params.score_name}",
-)
+        params.out_dir,
+        "trainandeval",
+        "results",
+        f"k_{params.abundance}_{params.score_name}",
+    ) + "/"
     if kwargs.get('parse'):
         parse_output_files(result_dir)
     if kwargs.get('plot'):
+        params.out_dir = os.path.join(params.out_dir, "trainandeval", "results") 
         generate_plots(params)
 
 if __name__ == '__main__':
