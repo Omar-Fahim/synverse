@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#SBATCH --job-name=synverse_a100_regular_2_GPUs
+#SBATCH --job-name=synverse_a100_regular_2_GPUs_cv
 #SBATCH --output=%x_%j.out
 #SBATCH --error=%x_%j.err
 #SBATCH --time=24:00:00
@@ -45,8 +45,8 @@ echo "[$(date +%H:%M:%S)] Starting Nextflow..."
 nextflow run . \
   -profile conda,gpu \
   --input $RESOLVED_CFG \
-  -work-dir $WORK/synverse/regular_work \
-  --outdir $WORK/synverse/regular_results \
+  -work-dir $HPCVAULT/synverse/regular_work \
+  --outdir $HPCVAULT/synverse/regular_results \
   -c conf/cluster_gpu.config \
   -with-report report_${SLURM_JOB_ID}.html \
   -with-trace trace_${SLURM_JOB_ID}.txt \
