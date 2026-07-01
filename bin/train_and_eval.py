@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 import argparse
-import ast
 import pickle
 import json
 from types import SimpleNamespace
@@ -60,14 +59,12 @@ def parse_feature_arg(value):
     if isinstance(value, list):
         return value
 
-    try:
-        parsed = ast.literal_eval(value)
-    except (ValueError, SyntaxError):
-        return [value]
-
-    if isinstance(parsed, list):
-        return parsed
-    return [parsed]
+    value = str(value).strip()
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1].strip()
+    if not value:
+        return []
+    return [item.strip().strip("'\"") for item in value.split(",")]
 
 
 
