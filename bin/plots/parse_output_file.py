@@ -136,7 +136,9 @@ def read_loss_file_content(file_path):
     return loss_dict
 
 def get_run_feat_info(file_path, run_number, feature_filter=None):
-    clean_file_name = file_path.split('/')[-1].replace("_val_true_loss.txt", "")
+    clean_file_name = file_path.split('/')[-1]
+    clean_file_name = clean_file_name.replace("_val_true_loss.txt", "")
+    clean_file_name = clean_file_name.replace("_cv_loss.txt", "")
     features = re.sub(r'run_[0-4]', '', clean_file_name)  # Remove 'run_x' pattern
     drug_features = features.split('_C_')[0].replace('D_', '')
     cell_features = features.split('_C_')[1].split('_rewired_')[0].split('_shuffled_')[0].split('_randomized_score_')[0]
@@ -175,6 +177,19 @@ def get_run_feat_info(file_path, run_number, feature_filter=None):
     }
     return run_info
 
+def get_pred_file_path(loss_file_path):
+    if loss_file_path.endswith('_val_true_loss.txt'):
+        return loss_file_path.replace(
+            '_val_true_loss.txt',
+            '_val_true_test_predicted_scores.tsv'
+        )
+    if loss_file_path.endswith('_cv_loss.txt'):
+        return loss_file_path.replace(
+            '_cv_loss.txt',
+            '_cv_test_predicted_scores.tsv'
+        )
+    raise ValueError(f'Unexpected loss file name: {loss_file_path}')
+
 def iterate_output_files(folder_path):
     out_file_list = []
     # Iterate over each 'run_x' folder
@@ -188,10 +203,10 @@ def iterate_output_files(folder_path):
             for file_or_dirname in os.listdir(run_path):
                 #************* REGRESSION LOSS *********************************
                 # Consider files ending with '_loss.txt' to get train and test loss
-                if file_or_dirname.endswith('_val_true_loss.txt'):
+                if file_or_dirname.endswith('_val_true_loss.txt') or file_or_dirname.endswith('_cv_loss.txt'):
                     # Open and read the file content
                     loss_file_path = os.path.join(run_path, file_or_dirname)
-                    pred_file_path = loss_file_path.replace('_val_true_loss.txt', '_val_true_test_predicted_scores.tsv')
+                    pred_file_path = get_pred_file_path(loss_file_path)
                     #find the feature-based filter it was run on
                     run_info_dict = get_run_feat_info(loss_file_path, run_number)
                     run_info_dict.update({'loss_file':loss_file_path, "pred_file": pred_file_path})
@@ -203,10 +218,10 @@ def iterate_output_files(folder_path):
                     for sub_dir in sub_dirs:
                         one_hot_files = os.listdir(os.path.join(run_path, file_or_dirname, sub_dir))
                         for one_hot_file in one_hot_files:
-                            if one_hot_file.endswith('_val_true_loss.txt'):
+                            if one_hot_file.endswith('_val_true_loss.txt') or one_hot_file.endswith('_cv_loss.txt'):
                                 # Open and read the file content
                                 loss_file_path= os.path.join(run_path, file_or_dirname, sub_dir, one_hot_file)
-                                pred_file_path = loss_file_path.replace('_val_true_loss.txt', '_val_true_test_predicted_scores.tsv')
+                                pred_file_path = get_pred_file_path(loss_file_path)
                                 run_info_dict = get_run_feat_info(loss_file_path, run_number, feature_filter=sub_dir)
                                 run_info_dict.update({'loss_file': loss_file_path, "pred_file": pred_file_path})
                                 out_file_list.append(run_info_dict)

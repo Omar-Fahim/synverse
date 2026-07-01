@@ -720,10 +720,26 @@ def generate_plots(params):
 
                 #compute_RMSE from MSE
                 for split in ['test', 'train', 'val']:
-                    result_df[f'{split}_RMSE'] = np.sqrt(result_df[f'{split}_MSE'])
+                    if f'{split}_MSE' in result_df.columns:
+                        result_df[f'{split}_RMSE'] = np.sqrt(result_df[f'{split}_MSE'])
+
+                if getattr(params, 'cv', {}).get('enabled', False) and params.train_type == 'regular' and metric == 'Pearsons':
+                    plot_cv_metric_curves(
+                        copy.deepcopy(result_df),
+                        metric='Pearsons',
+                        ylabel="Pearson's correlation",
+                        out_file_prefix=f'{result_dir}/plot/{orientation}/cv_{score_name_str}_{split_type}'
+                    )
+
+                    plot_cv_metric_curves(
+                        copy.deepcopy(result_df),
+                        metric='test_RMSE',
+                        ylabel='Test RMSE',
+                        out_file_prefix=f'{result_dir}/plot/{orientation}/cv_{score_name_str}_{split_type}'
+                    )
 
                 # compute average, median, min, max of scores across runs.
-                df_avg = aggregate_scores(result_df)
+                df_avg = aggregate_scores(result_df) # contains drug_feaures+cell_features+feature_filter+Model
                 df_avg.to_csv(f'{result_dir}/{score_name_str}_{split_type}_aggreagred.tsv', sep='\t')
 
                 # significance_df = compute_average_and_significance(copy.deepcopy(result_df), metric, alt=alt)
@@ -738,12 +754,12 @@ def generate_plots(params):
                 pair_wise_sig_df.to_csv(f'{result_dir}/{score_name_str}_{split_type}_{metric}_pairwise_model_significance.tsv', sep='\t')
 
                 # get feature_filter wise one_hot model's  performance
-                df_1hot = df_avg[df_avg['Model'] == 'One hot']
-                ft_filt_wise_1hot = dict(zip(df_1hot['feature_filter'], df_1hot[f'{metric}_median']))
+                df_1hot = df_avg[df_avg['Model'] == 'One hot'] # keep only the rows where df_1hot contains the baseline performance.
+                ft_filt_wise_1hot = dict(zip(df_1hot['feature_filter'], df_1hot[f'{metric}_median'])) 
                 if not df_1hot.empty:
-                 global_1hot_median = df_1hot[f'{metric}_median'].median()
-                for feature_filter in result_df['feature_filter'].dropna().unique():
-                    ft_filt_wise_1hot.setdefault(feature_filter, global_1hot_median)
+                    global_1hot_median = df_1hot[f'{metric}_median'].median() # medain of all  one hot models performance across diffrent feature filters (it is always one here)
+                    for feature_filter in result_df['feature_filter'].dropna().unique():
+                        ft_filt_wise_1hot.setdefault(feature_filter, global_1hot_median)
 
                 wrapper_plot_model_performance_subplots(copy.deepcopy(result_df),ft_filt_wise_1hot, metric=metric, y_label=y_label, title=split_type, orientation=orientation, out_file_prefix =f'{result_dir}/plot/{orientation}/{score_name_str}_{split_type}_{metric}')
 
@@ -861,7 +877,51 @@ def generate_plots(params):
                                              out_file_prefix=f'{result_dir}/plot/{orientation}/rewired_{score_name_str}_{split_type}_{metric}')
 
                 print(f'done {split_type}')
+def plot_cv_metric_curves(df, metric, ylabel, out_file_prefix):
+    df = df.copy()
 
+    if metric == 'test_RMSE' and 'test_RMSE' not in df.columns:
+        df['test_RMSE'] = np.sqrt(df['test_MSE'])
+
+    df['fold'] = df['run_no'].astype(str).str.replace('run_', 'fold_', regex=False) # create a new column fold same as run
+
+    mean_df = df.groupby(['Model'], as_index=False)[metric].mean() # average values for each model across folds
+    mean_df['fold'] = 'average'
+
+    plt.figure(figsize=(12, 6))
+
+    sns.lineplot(
+        data=df,
+        x='Model',
+        y=metric,
+        hue='fold',
+        marker='o',
+        linewidth=1,
+        alpha=0.45
+    )
+
+    sns.lineplot(
+        data=mean_df,
+        x='Model',
+        y=metric,
+        color='black',
+        marker='o',
+        linewidth=3,
+        label='average'
+    )
+
+    plt.ylabel(ylabel)
+    plt.xlabel('')
+    plt.xticks(rotation=90)
+    plt.tight_layout()
+
+    if out_file_prefix is not None:
+        os.makedirs(os.path.dirname(out_file_prefix), exist_ok=True)
+        plot_file = f'{out_file_prefix}_{metric}_cv_curve.pdf'
+        plt.savefig(plot_file, bbox_inches='tight')
+        print(f'Saved file: {plot_file}')
+
+    plt.show()   
 
 def main(params, **kwargs):
     result_dir = os.path.join(
