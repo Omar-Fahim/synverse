@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import argparse
+import ast
 import pickle
 import json
 from types import SimpleNamespace
@@ -55,6 +56,20 @@ def load_params(path):
     return SimpleNamespace(**load_json(path))
 
 
+def parse_feature_arg(value):
+    if isinstance(value, list):
+        return value
+
+    try:
+        parsed = ast.literal_eval(value)
+    except (ValueError, SyntaxError):
+        return [value]
+
+    if isinstance(parsed, list):
+        return parsed
+    return [parsed]
+
+
 
 
 
@@ -79,8 +94,8 @@ def main():
     val_idx = load_pickle(args.val_idx_file)
     cur_dfeat_dict = load_pickle(args.dfeat_file)
     cur_cfeat_dict = load_pickle(args.cfeat_file)
-    select_drug_feat = args.drug_feat
-    select_cell_feat = args.cell_feat
+    select_drug_feat = parse_feature_arg(args.drug_feat)
+    select_cell_feat = parse_feature_arg(args.cell_feat)
     split_type = args.split_type
     run_no = args.run_no
     cell_line_2_idx = load_pickle(args.cell_line_2_idx)

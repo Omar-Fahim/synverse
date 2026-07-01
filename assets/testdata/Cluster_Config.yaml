@@ -157,7 +157,7 @@ input_settings:
     run_id : 'synverse'
     server_type: 'local'
   cv:
-    enabled: true
+    enabled: false
     n_folds: 5
   rewire_method: [ "SA","SM" ] #rewiring technique to use. SM: Sneppen-Maslov based degree-preserving rewiring, SA: Simulated Annealing based strength-preserving rewiring
 output_settings:

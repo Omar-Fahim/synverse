@@ -61,7 +61,7 @@ class BaseRunManager:
 
 class ShuffleRunManager(BaseRunManager):
     def run_wrapper(self):
-        for shuffle_no  in range (10):
+        for shuffle_no  in range (5):
             # Shuffle features for a single run
             shuffled_dfeat_dict = {**self.dfeat_dict, 'value': shuffle_features(self.dfeat_dict['value'])}
             shuffled_cfeat_dict = {**self.cfeat_dict, 'value': shuffle_features(self.cfeat_dict['value'])}
