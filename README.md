@@ -87,6 +87,11 @@ When `train_type: rewire` is selected, choose the rewiring method by setting the
 | Simulated Annealing | `rewire_method: ["SA"]` |
 | Sneppen–Maslov | `rewire_method: ["SM"]` |
 
+To parse the output files and create plots showing RMSE and PCC score of the models:
+python -m bin.plots.results_plots --parse --config assets/testdata/Cluster_Config.yaml
+python -m bin.plots.results_plots --plot --config assets/testdata/Cluster_Config.yaml 
+
+
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
