@@ -59,11 +59,13 @@ Now, you can run the pipeline using:
 <!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
 
 ```bash
-nextflow run nf-core/synverse \
-   -profile <docker/singularity/.../institute> \
-   --input samplesheet.csv \
-   --outdir <OUTDIR>
+nextflow run . \
+  -profile conda,gpu \
+  --input <path of your config file> \
+  --outdir <path of your output directory> \
 ```
+> **Note**
+> This pipeline is intended to run on the FAU NHR HPC clusters using A100 GPUs on the TinyGPU partition. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
 
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
