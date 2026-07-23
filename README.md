@@ -109,6 +109,9 @@ python -m bin.plots.results_plots \
 > **Note**
 > The parsing and plotting scripts expect the pipeline output directory to be named `results` and located in the project root. If your pipeline outputs are stored elsewhere, rename or move the output directory before running the parsing and plotting scripts.
 
+> **Note**
+> Comparison plots are generated from the results of two independent pipeline runs (e.g., regular and shuffle). Since the plotting script operates on a single `results` directory, the parsed outputs must be manually combined before plotting.
+
 To generate plots comparing a regular run with a shuffle run \ randomized run:
 1. Run the pipeline with `train_type: regular`.
 2. Copy the pipeline output directory from the cluster to the project root and rename it to `results`.
