@@ -31,7 +31,8 @@
 7. If rewire tests are enabled, models are trained and evaluated using rewired networks.
 8. If randomized-score tests are enabled, models are trained and evaluated using randomized synergy scores.
 9. Results are aggregated and summary plots are generated.
-
+    
+![Pipeline overview](docs/images/pipeline.png)
 
 ## Usage
 
