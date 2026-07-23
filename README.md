@@ -22,15 +22,15 @@
 
 **nf-core/synverse** is a bioinformatics pipeline that is implemented in Nextflow based on the original [Synverse](https://github.com/Murali-group/SynVerse) codebase. **nf-core/synverse** automates key preprocessing and evaluation tasks for drug synergy prediction models, minimizing implementation effort and enabling researchers to focus on developing and improving predictive modeling methods. By contributing your model to the Synverse catalog, you can increase your work's reproducibility, reusability, and transferability.
 
-1- The input data and configuration are loaded.
-2- Drug and cell-line features are prepared.
-3- Training, validation, and test sets are generated.
-4- Features are preprocessed and normalized.
-5- Models are trained and evaluated for each feature combination and data split.
-6- If shuffle tests are enabled, models are trained and evaluated using shuffled features.
-7- If rewire tests are enabled, models are trained and evaluated using rewired networks.
-8- If randomized-score tests are enabled, models are trained and evaluated using randomized synergy scores.
-9- Results are aggregated and summary plots are generated.
+1. The input data and configuration are loaded.
+2. Drug and cell-line features are prepared.
+3. Training, validation, and test sets are generated.
+4. Features are preprocessed and normalized.
+5. Models are trained and evaluated for each feature combination and data split.
+6. If shuffle tests are enabled, models are trained and evaluated using shuffled features.
+7. If rewire tests are enabled, models are trained and evaluated using rewired networks.
+8. If randomized-score tests are enabled, models are trained and evaluated using randomized synergy scores.
+9. Results are aggregated and summary plots are generated.
 
 
 ## Usage
