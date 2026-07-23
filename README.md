@@ -68,6 +68,25 @@ nextflow run . \
 > **Note**
 > This pipeline is intended to run on the FAU NHR HPC clusters using A100 GPUs on the TinyGPU partition. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
 
+**nf-core/synverse** is configured using a YAML configuration file (e.g., assets/testdata/Cluster_Config.yaml), which allows users to specify all training settings, including the input features, model architecture, random seeds, data-splitting strategies, number of runs, and whether to perform cross-validation.
+
+To select the desired experiment, configure the following parameters in the YAML file:
+
+| Experiment | Configuration |
+|------------|---------------|
+| Regular training | `train_type: regular` |
+| Regular training with cross-validation | `train_type: regular`<br>`cv: true` |
+| Feature shuffle experiments | `train_type: shuffle` |
+| Network rewiring experiments | `train_type: rewire` |
+| Randomized synergy score experiments | `train_type: randomized_score` |
+
+When `train_type: rewire` is selected, choose the rewiring method by setting the `rewire_method` parameter in the configuration file:
+
+| Rewiring method | Configuration |
+|-----------------|---------------|
+| Simulated Annealing | `rewire_method: ["SA"]` |
+| Sneppen–Maslov | `rewire_method: ["SM"]` |
+
 > [!WARNING]
 > Please provide pipeline parameters via the CLI or Nextflow `-params-file` option. Custom config files including those provided by the `-c` Nextflow option can be used to provide any configuration _**except for parameters**_; see [docs](https://nf-co.re/docs/usage/getting_started/configuration#custom-configuration-files).
 
