@@ -87,9 +87,77 @@ When `train_type: rewire` is selected, choose the rewiring method by setting the
 | Simulated Annealing | `rewire_method: ["SA"]` |
 | Sneppen–Maslov | `rewire_method: ["SM"]` |
 
+## Parsing and Plotting
 To parse the output files and create plots showing RMSE and PCC score of the models:
-python -m bin.plots.results_plots --parse --config assets/testdata/Cluster_Config.yaml
-python -m bin.plots.results_plots --plot --config assets/testdata/Cluster_Config.yaml 
+
+### Parse the results
+
+```bash
+python -m bin.plots.results_plots \
+    --parse \
+    --config assets/testdata/Cluster_Config.yaml
+```
+
+### Generate the plots
+
+```bash
+python -m bin.plots.results_plots \
+    --plot \
+    --config assets/testdata/Cluster_Config.yaml
+```
+
+> **Note**
+> The parsing and plotting scripts expect the pipeline output directory to be named `results` and located in the project root. If your pipeline outputs are stored elsewhere, rename or move the output directory before running the parsing and plotting scripts.
+
+To generate plots comparing a regular run with a shuffle run \ randomized run:
+1. Run the pipeline with `train_type: regular`.
+2. Copy the pipeline output directory from the cluster to the project root and rename it to `results`.
+3. Run the parsing script.
+4. Rename the parsed output directory (e.g., `results_regular`) to preserve it.
+5. Run the pipeline with `train_type: shuffle \ randomized_score`.
+6. Copy the pipeline output directory from the cluster to the project root and rename it to `results`.
+7. Run the parsing script.
+8. Copy the following files from the regular run into the corresponding location of the shuffle run:
+   - `output_leave_cell_line.tsv`
+   - `output_leave_comb.tsv`
+   - `output_random.tsv`
+   - `output_leave_drug.tsv`
+9. Run the plotting script to generate the comparison plots.
+
+
+To generate plots comparing a regular run with rewired runs:
+
+1. Run the pipeline with `train_type: regular`.
+2. Copy the pipeline output directory from the cluster to the project root and rename it to `results`.
+3. Run the parsing script.
+4. Rename the parsed output directory (e.g., `results_regular`) to preserve it.
+5. Run the pipeline with `train_type: rewire` and `rewire_method: ["SA"]`.
+6. Copy the pipeline output directory from the cluster to the project root and rename it to `results`.
+7. Run the parsing script.
+8. Rename the parsed output directory (e.g., `results_rewired_SA`) to preserve it.
+9. Run the pipeline with `train_type: rewire` and `rewire_method: ["SM"]`.
+10. Copy the pipeline output directory from the cluster to the project root and rename it to `results`.
+11. Run the parsing script.
+12. Combine the results from the two rewiring methods:
+
+    ```bash
+    python combine_rewired_tsvs.py \
+        --sa_dir <path/to/results_rewired_SA/trainandeval/results/k_0.05_S_mean_mean> \
+        --sm_dir <path/to/results/trainandeval/results/k_0.05_S_mean_mean> \
+        --out_dir <path/to/output_directory>
+    ```
+
+13. Copy the generated files into the corresponding location of the `results` directory, replacing the existing files.
+14. Copy the following files from the regular run into the corresponding location of the `results` directory:
+    - `output_leave_cell_line.tsv`
+    - `output_leave_comb.tsv`
+    - `output_random.tsv`
+    - `output_leave_drug.tsv`
+15. Run the plotting script to generate the comparison plots.
+
+
+
+
 
 
 > [!WARNING]
