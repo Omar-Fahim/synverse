@@ -62,8 +62,8 @@ Now, you can run the pipeline using:
 ```bash
 nextflow run . \
   -profile conda,gpu \
-  --input <path of your config file> \
-  --outdir <path of your output directory> \
+  --input <path to your config file> \
+  --outdir <path to your output directory> \
 ```
 > **Note**
 > This pipeline is intended to run on the FAU NHR HPC clusters using A100 GPUs on the TinyGPU partition. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
@@ -143,12 +143,18 @@ To generate plots comparing a regular run with rewired runs:
 11. Run the parsing script.
 12. Combine the results from the two rewiring methods:
 
-    ```bash
-    python combine_rewired_tsvs.py \
-        --sa_dir <path/to/results_rewired_SA/trainandeval/results/k_0.05_S_mean_mean> \
-        --sm_dir <path/to/results/trainandeval/results/k_0.05_S_mean_mean> \
-        --out_dir <path/to/output_directory>
-    ```
+ ```bash
+python combine_rewired_tsvs.py \
+    --sa_dir <path/to/SA_rewired_output_directory> \
+    --sm_dir <path/to/SM_rewired_output_directory> \
+    --out_dir <path/to/output_directory>
+```
+where `--sa_dir` and `--sm_dir` should point to the directory containing:
+
+- `output_leave_cell_line_rewired.tsv`
+- `output_leave_comb_rewired.tsv`
+- `output_leave_drug_rewired.tsv`
+- `output_random_rewired.tsv`
 
 13. Copy the generated files into the corresponding location of the `results` directory, replacing the existing files.
 14. Copy the following files from the regular run into the corresponding location of the `results` directory:
