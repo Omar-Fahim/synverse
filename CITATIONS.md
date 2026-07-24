@@ -39,3 +39,7 @@
 - [Singularity](https://pubmed.ncbi.nlm.nih.gov/28494014/)
 
   > Kurtzer GM, Sochat V, Bauer MW. Singularity: Scientific containers for mobility of compute. PLoS One. 2017 May 11;12(5):e0177459. doi: 10.1371/journal.pone.0177459. eCollection 2017. PubMed PMID: 28494014; PubMed Central PMCID: PMC5426675.
+## DrEval
+Bernett J, Iversen P, Picciani M, Wilhelm M, Baum K, List M. Critical evaluation of drug response prediction models with DrEval. Nature Communications. 2026 May 12;17(1):4238.
+## Synverse
+Tasnina N, Haghani M, Murali TM. Synverse: A framework for systematic evaluation of deep learning based drug synergy prediction models. bioRxiv. 2025 May 1:2025-04.
