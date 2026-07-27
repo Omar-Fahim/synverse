@@ -56,9 +56,9 @@ Each row represents a fastq file (single-end) or a pair of fastq files (paired e
 -->
 
 
-This pipeline is intended to run on the FAU NHR HPC clusters using A100 GPUs on the TinyGPU partition. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
+This pipeline is intended to run on the FAU NHR HPC clusters. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
 
-**nf-core/synverse** is configured using a YAML configuration file (e.g., assets/testdata/Cluster_Config.yaml), which allows users to specify all training settings, including the input features, model architecture, random seeds, data-splitting strategies, number of runs, and whether to perform cross-validation.
+**nf-core/synverse** is configured using a YAML configuration file (e.g., assets/testdata/Cluster_Config.yaml), which allows users to specify all training settings, including the input features, model hyperparameters, random seeds, data-splitting strategies, number of runs, and whether to perform cross-validation.
 
 To select the desired experiment, configure the following parameters in the YAML file:
 
@@ -78,6 +78,13 @@ When `train_type: rewire` is selected, choose the rewiring method by setting the
 | Sneppen–Maslov | `rewire_method: ["SM"]` |
 
 ## Parsing and Plotting
+Create and activate a separate plotting environment before running the parsing and plotting scripts:
+
+```bash
+conda create -n synverse_plotting 
+conda activate synverse_plotting
+pip install -r envs/plotting-requirements.txt
+```
 
 After the pipeline finishes, parse the training output files before generating plots. Use the same config file that was used for the pipeline run so the plotting script can find `output_dir`, `score_name`, `abundance`, and the configured split types.
 
@@ -93,7 +100,7 @@ The parser writes summary files under:
 <output_dir>/trainandeval/results/k_<abundance>_<score_name>/
 ```
 
-Generate plots by selecting one of the supported `--plot_type` values:
+Generate plots by selecting one of the supported `--plot_type` values (For comparison plots, complete the preparation steps below before running the commands):
 
 | Plot type | Command | Required parsed files |
 | --- | --- | --- |
@@ -109,13 +116,8 @@ Plot PDFs are saved under:
 <output_dir>/trainandeval/results/k_<abundance>_<score_name>/plot/vertical/
 ```
 
-
-
 > **Note**
-> The parsing and plotting scripts expect the pipeline output directory to be named `results` and located in the project root. If your pipeline outputs are stored elsewhere, rename or move the output directory before running the parsing and plotting scripts.
-
-> **Note**
-> Comparison plots are generated from the results of two independent pipeline runs (e.g., regular and shuffle). Since the plotting script operates on a single `results` directory, the parsed outputs must be manually combined before plotting.
+> Comparison plots are generated from the results of two independent pipeline runs (e.g., regular and shuffle). Since the plotting script operates on a single results directory, the parsed output files from both runs must exist in the same results directory before generating the plots.
 
 To generate plots comparing a regular run with a shuffle run \ randomized run:
 1. Run the pipeline with `train_type: regular`.
@@ -152,7 +154,7 @@ To generate plots comparing a regular run with rewired runs:
 python combine_rewired_tsvs.py \
     --sa_dir <path/to/SA_rewired_output_directory> \
     --sm_dir <path/to/SM_rewired_output_directory> \
-    --out_dir <path/to/output_directory>
+    --out_dir <path/to/output_directory> (could be the same as sm_dir, if you want to skip the copying and pasting of the generated files)
 ```
 where `--sa_dir` and `--sm_dir` should point to the directory containing:
 
