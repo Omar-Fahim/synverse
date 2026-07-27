@@ -55,18 +55,8 @@ Each row represents a fastq file (single-end) or a pair of fastq files (paired e
 
 -->
 
-Now, you can run the pipeline using:
 
-<!-- TODO nf-core: update the following command to include all required parameters for a minimal example -->
-
-```bash
-nextflow run . \
-  -profile conda,gpu \
-  --input <path to your config file> \
-  --outdir <path to your output directory> \
-```
-> **Note**
-> This pipeline is intended to run on the FAU NHR HPC clusters using A100 GPUs on the TinyGPU partition. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
+This pipeline is intended to run on the FAU NHR HPC clusters using A100 GPUs on the TinyGPU partition. For a complete execution example, including the Slurm job submission script and recommended resource settings, see `scripts/run_synverse.sh`.
 
 **nf-core/synverse** is configured using a YAML configuration file (e.g., assets/testdata/Cluster_Config.yaml), which allows users to specify all training settings, including the input features, model architecture, random seeds, data-splitting strategies, number of runs, and whether to perform cross-validation.
 
@@ -88,9 +78,8 @@ When `train_type: rewire` is selected, choose the rewiring method by setting the
 | Sneppen–Maslov | `rewire_method: ["SM"]` |
 
 ## Parsing and Plotting
-To parse the output files and create plots showing RMSE and PCC score of the models:
 
-### Parse the results
+After the pipeline finishes, parse the training output files before generating plots. Use the same config file that was used for the pipeline run so the plotting script can find `output_dir`, `score_name`, `abundance`, and the configured split types.
 
 ```bash
 python -m bin.plots.results_plots \
@@ -98,13 +87,29 @@ python -m bin.plots.results_plots \
     --config assets/testdata/Cluster_Config.yaml
 ```
 
-### Generate the plots
+The parser writes summary files under:
 
-```bash
-python -m bin.plots.results_plots \
-    --plot \
-    --config assets/testdata/Cluster_Config.yaml
+```text
+<output_dir>/trainandeval/results/k_<abundance>_<score_name>/
 ```
+
+Generate plots by selecting one of the supported `--plot_type` values:
+
+| Plot type | Command | Required parsed files |
+| --- | --- | --- |
+| Regular model performance | `python -m bin.plots.results_plots --plot --plot_type regular --config assets/testdata/Cluster_Config.yaml` | `output_<split>.tsv` |
+| Shuffled feature comparison | `python -m bin.plots.results_plots --plot --plot_type shuffle --config assets/testdata/Cluster_Config.yaml` | `output_<split>.tsv`, `output_<split>_shuffled.tsv` |
+| Randomized score comparison | `python -m bin.plots.results_plots --plot --plot_type randomized --config assets/testdata/Cluster_Config.yaml` | `output_<split>.tsv`, `output_<split>_randomized.tsv` |
+| Rewired network comparison | `python -m bin.plots.results_plots --plot --plot_type rewired --config assets/testdata/Cluster_Config.yaml` | `output_<split>.tsv`, `output_<split>_rewired.tsv` |
+| Cross-validation curves | `python -m bin.plots.results_plots --plot --plot_type cv --config assets/testdata/Cluster_Config.yaml` | `output_<split>.tsv` from a regular run  with `cv.enabled: true` |
+
+Plot PDFs are saved under:
+
+```text
+<output_dir>/trainandeval/results/k_<abundance>_<score_name>/plot/vertical/
+```
+
+
 
 > **Note**
 > The parsing and plotting scripts expect the pipeline output directory to be named `results` and located in the project root. If your pipeline outputs are stored elsewhere, rename or move the output directory before running the parsing and plotting scripts.
