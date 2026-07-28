@@ -47,7 +47,7 @@ process TRAINANDEVAL {
      GPU_LOCK_DIR="\${SYNVERSE_TMPDIR:-\${TMPDIR:-\${SLURM_TMPDIR:-/tmp}}}/gpu_locks/\${SLURM_JOB_ID:-manual}" # Directory where GPU reservation lock files are stored
      mkdir -p "\$GPU_LOCK_DIR"
 
-     AVAILABLE_GPUS="\${CUDA_VISIBLE_DEVICES:-0,1}"
+     AVAILABLE_GPUS="\${CUDA_VISIBLE_DEVICES:-0,1}" # This is a comma-separated list of available GPU IDs. If CUDA_VISIBLE_DEVICES is not set, it defaults to "0,1" 
      IFS=',' read -ra GPU_IDS <<< "\$AVAILABLE_GPUS" # Convert it to array
 
 
@@ -57,7 +57,7 @@ process TRAINANDEVAL {
      echo "[\$(date)] Task ${task.index}: available GPUs: \$AVAILABLE_GPUS"
      while true; do
      (
-         flock -x 200 # Here only one process can execute the GPU selection code at a time to prevent race conditions (exactly means put an exclusive lock ont eh file attached to descriptor 200)
+         flock -x 200 # Here only one process can execute the GPU selection code at a time to prevent race conditions (exactly means put an exclusive lock on the file attached to descriptor 200)
 
          SELECTED_GPU=""
 
@@ -75,21 +75,21 @@ process TRAINANDEVAL {
                  break
              fi
          done
-     )  200>>"\$GPU_LOCK_DIR/select.lock" #  (exactly Open (or create) the file select.lock and assign it to file descriptor 200) the bash ends here so we release the lock
+     )  200>>"\$GPU_LOCK_DIR/select.lock" #  select.lock is assigned to file descriptor 200, so that only one process can execute the GPU selection code at a time (This is the first line that is executed, after that the code inside (...) executes, then after the code inside (...) finishes,the lock is released and another process can execute the code inside (...))
 
      if [ -f gpu_id.selected ]; then # Here we will check if a GPU was selected 
          GPU_ID=\$(cat gpu_id.selected)
-         GPU_RES_FILE=\$(cat gpu_reservation_file.selected) # this makes the python script think that only the selected gpu exists
-         export CUDA_VISIBLE_DEVICES="\$GPU_ID"
+         GPU_RES_FILE=\$(cat gpu_reservation_file.selected) 
+         export CUDA_VISIBLE_DEVICES="\$GPU_ID" # this makes the python script think that only the selected gpu exists
          echo "Using physical GPU \$GPU_ID"
          break
      fi
 
      echo "No GPU slot available. Waiting..."
-     sleep 60 # Wait for 60 seconds before checking again
+     sleep 60 # if no GPU is available, wait for 60 seconds before checking again
      done
 
-     trap 'rm -f "\$GPU_RES_FILE"' EXIT #when the script exists delete the reservation file so that other processes can use this GPU
+     trap 'rm -f "\$GPU_RES_FILE"' EXIT #when the script exists delete the reservation file so the number of processes using the GPU is decremented
      echo "[\$(date)] About to start train_and_eval.py"
 
     train_and_eval.py \\

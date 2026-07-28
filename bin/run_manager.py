@@ -49,6 +49,8 @@ class BaseRunManager:
         cv_settings = getattr(self.params, 'cv', {'enabled': False})
         cv_enabled = cv_settings.get('enabled', False)
 
+        # Disable the use of validation if train_type is regular and cv is enabled
+        # in cross validation, we don't have a validation set, each time we train on n-1 folds and test on the remaining fold, so we don't need a validation set.
         use_validation = not (self.params.train_type == 'regular' and cv_enabled)
 
         trained_model_state, train_loss = runner.train_model_given_config(hyperparam, self.given_epochs, validation=use_validation, save_output=True)
@@ -99,15 +101,13 @@ class RewireRunManager(BaseRunManager):
 
 
 # Runner takes the same out_file_prefix from execute_run, so runner writes the best hyperparameter file in the location passed from execute_run
-# However, they were searching for the path in self.out_file_prefix,It was working in normal run because in normal run we do not change the file path
+# However, they were searching for the best hyperparameter file using the path specified in self.out_file_prefix, It was working in normal run because in normal run execute_run do not change the out_file_prefix
 class RandomizeScoreRunManager(BaseRunManager):
     def run_wrapper(self):
         for rand_version in range(5):
-            # randomized_train_file = f'{split_file_path}{rand_version}all_train_randomized_score.tsv'
             randomized_df = pd.DataFrame()
-            # Loop through each edge type and shuffle the scores within that edge type (edge type is the cell line)
             edge_types = set(self.train_df['edge_type'].unique())
-            for edge_type in edge_types:
+            for edge_type in edge_types: # Loop through each edge type and shuffle the scores within that edge type (edge type is the cell line)
                 edge_pos_df = self.train_df[(self.train_df['edge_type'] == edge_type) & (self.train_df[self.params.score_name]>=0)].copy()
                 edge_pos_df[self.params.score_name] = edge_pos_df[self.params.score_name].sample(frac=1).values
                 edge_neg_df = self.train_df[(self.train_df['edge_type'] == edge_type) & (self.train_df[self.params.score_name]<0)].copy()
@@ -130,7 +130,6 @@ class RandomizeScoreRunManager(BaseRunManager):
 
             deviation = compute_deviation_of_score(randomized_df, self.train_df, self.params.score_name)
 
-            # randomized_df[self.params.score_name] = randomized_df[self.params.score_name].sample(frac=1).reset_index(drop=True)
             out_file_prefix_randomized = f'{self.out_file_prefix}_randomized_score_{rand_version}'
             self.execute_run(randomized_df,  self.train_idx, self.val_idx, self.dfeat_dict, self.cfeat_dict, out_file_prefix_randomized)
 
@@ -151,7 +150,7 @@ class RunManagerFactory:
             "randomized_score": RandomizeScoreRunManager,
 
         }.get(train_type, BaseRunManager)
-
+        #choose the appropriate run manager class based on the train_type argument. If train_type is not recognized, default to BaseRunManager.
         return cls(params, model_info, given_epochs, train_df, train_idx, val_idx,
                    dfeat_dict, cfeat_dict, test_df, drug_2_idx, cell_line_2_idx,
                    out_file_prefix, file_prefix, device, split_file_path=split_file_path, val_frac=val_frac, test_frac=test_frac, split_type=split_type )

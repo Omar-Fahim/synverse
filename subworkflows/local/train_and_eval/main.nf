@@ -23,20 +23,26 @@ workflow TRAIN_AND_EVAL {
     main:
     // TODO nf-core: substitute modules here for the modules of your subworkflow
     ch_versions = Channel.empty()
+    
+    // This module will take the drug_cell_features_combinations.pkl file and expand it to a channel that prints all possible combinations of drug and cell features. Each line will contain one drug feature and one cell feature, separated by a tab character.
     EXPANDFEATUREDRUGCOMBINATIONSFILE(
     drug_cell_features_combinations
     )
-
+    // a channel that emits all possible combinations of drug and cell features
     feature_combination_ch =
     EXPANDFEATUREDRUGCOMBINATIONSFILE.out.combinations
         .splitText() // one line contains one drug feature and one cell feature, splitText() make nextflow see each line as a seperate channel item
-        .map { line ->
+        .map { line -> // loop over each line in the channel
 
-            def (drug_feat, cell_feat) = line.trim().split('\t')
+            def (drug_feat, cell_feat) = line.trim().split('\t') // split the line into drug feature and cell feature, separated by a tab character
 
             tuple(drug_feat, cell_feat)
         }
 
+
+// Create one TRAINANDEVAL job for each run, split, and drug/cell feature combination.
+// Each emitted tuple includes split metadata, train/test/validation files, selected
+// feature files, model parameters, and cell-line/drug index mappings.
    training_jobs =
     split_bundle
         .combine(feature_combination_ch)
@@ -80,10 +86,10 @@ workflow TRAIN_AND_EVAL {
                 train_idx_file,
                 val_idx_file,
 
-                dfeat_file,
+                dfeat_file, // the drug feature dictionary pickle file that contains the drug features
                 cfeat_file,
 
-                drug_feat, // not the drug_features.pkl . this one is from combinations.
+                drug_feat, // the drug feature name that will be used to select the drug feature from the drug feature dictionary
                 cell_feat,
                 params_json,
                 cell_line_2_idx,

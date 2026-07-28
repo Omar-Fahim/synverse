@@ -102,21 +102,29 @@ def main():
     
     print("drug and cell line features in use:", select_drug_feat, select_cell_feat)
 
+    # Keep only the selected features in the feature dictionaries
     select_dfeat_dict = keep_selected_feat(cur_dfeat_dict, select_drug_feat)
     select_cfeat_dict = keep_selected_feat(cur_cfeat_dict, select_cell_feat)
 
+    # Get model info and hyperparameters based on the selected features
     select_model_info = get_select_model_info(params.model_info, select_dfeat_dict['encoder'], select_cfeat_dict['encoder'])
     params.hyperparam = combine_hyperparams(select_model_info)
     given_epochs = params.epochs
-    feat_str = get_feat_prefix(cur_dfeat_dict, cur_cfeat_dict) # In the original synverse code, he uses the dfeat_dict and cfeat_dict before the splitting. It is just a method for naming files so it is just added complexity to keep passing the orignal dictionaries 
+
+    # Create an output file prefix based on the selected features
+    feat_str = get_feat_prefix(cur_dfeat_dict, cur_cfeat_dict) 
     out_file_prefix = create_file_prefix(params, select_dfeat_dict, select_cfeat_dict, split_type,
                                                       split_feat_str=feat_str, run_no=run_no, seed=seed)
+
     
     split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{args.test_frac}_{args.val_frac}/run_{run_no}_{seed}/"
     split_file_path = params.split_dir + split_info_str
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
+
     
+    # if cv is enabled and train_type is regular, we will use a different file prefix for the output files
     cv_settings = getattr(params, 'cv', {'enabled': False})
     cv_enabled = cv_settings.get('enabled', False)
 

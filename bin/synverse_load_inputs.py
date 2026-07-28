@@ -56,20 +56,20 @@ def main():
     with open(config_path, "r", encoding="utf-8") as handle: # Opens the config file for reading .
         config = yaml.safe_load(handle) # Reads YAML and converts it into a Python dictionary.
 
-    repo_root = Path(__file__).resolve().parents[1] # Current_Script_File path is resolved to an absolute path, then go two levels up to get the repository root directory.
+    repo_root = Path(__file__).resolve().parents[1] # Current_Script_File(synverse_load_inputs.py) path is resolved to an absolute path, then go two levels up to get the repository root directory.
     input_settings = config["input_settings"] # Retrieves the "input_settings" section from the config dictionary.
     output_settings = config["output_settings"] # Retrieves the "output_settings" section from the config dictionary.
-    # input_dir_str = os.path.expandvars(input_settings["input_dir"])
-    # input_dir = resolve_path(repo_root, input_dir_str)
+   
     input_dir = resolve_path(repo_root, input_settings["input_dir"]) # Resolves the input directory path relative to the repository root and converts it to an absolute Path.
     output_dir = resolve_path(repo_root, output_settings["output_dir"]) # Resolves the output directory path relative to the repository root and converts it to an absolute Path.
 
     input_files  = input_settings["input_files"]
-    active_drug_feature_names  = [f["name"] for f in input_settings.get("drug_features", [])] # Read drug features from config and create a list of active feature names.
+    # Read drug features from config and create a list of active feature names.
+    active_drug_feature_names  = [f["name"] for f in input_settings.get("drug_features", [])] 
 
     config_errors = []
 
-    # Here I check that the  synergy_file exists in config and is a non-empty pathstring
+    # Here I check that the  synergy_file exists in config and is a non-empty valid pathstring
     synergy_file= input_files.get("synergy_file")
     if synergy_file is None:
         config_errors.append("'synergy_file' is missing from input_files in the config")
@@ -92,7 +92,7 @@ def main():
         raise ValueError("\n".join(config_errors))
 
 
-# Here I validate that all active features have corresponding file keys in the config and that those file paths are valid.
+# Validate that each active drug feature has a valid non empty file path and that the file exists.
     for feature, file_key in FEATURE_FILE_MAP.items():
   
         if feature in active_drug_feature_names:
@@ -120,9 +120,10 @@ def main():
     if config_errors:
         raise ValueError("\n".join(config_errors))
 
-    
-    active_cell_line_feature_names  = [f["name"] for f in input_settings.get("cell_line_features", [])]
-# Here I validate that all active cell line features have corresponding file keys in the config and that those file paths are valid.
+    # Read cell line features from config and create a list of active feature names.
+    active_cell_line_feature_names  = [f["name"] for f in input_settings.get("cell_line_features", [])] 
+
+# Validate that each active cell line feature has a valid non empty file path and that the file exists.
     for feature, file_keys in CELL_LINE_FEATURE_FILE_MAP.items():
         if feature in active_cell_line_feature_names:
             for file_key in file_keys:
@@ -137,11 +138,6 @@ def main():
                 if str(input_files.get(file_key)).strip() == "":
                     config_errors.append(f"Value for '{file_key}' is empty")
                     continue
-                    
-                
-
-                
-
                 resolved_path = resolve_path(input_dir, str(input_files.get(file_key)))
                 if not resolved_path.exists():
                     config_errors.append(f"File for '{file_key}' does not exist: {resolved_path}")
@@ -150,6 +146,7 @@ def main():
 
     if config_errors:
         raise ValueError("\n".join(config_errors))
+    
     inputs, params = parse_config(config)
     data = {
         "inputs": inputs,

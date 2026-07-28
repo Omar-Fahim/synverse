@@ -37,8 +37,8 @@ def main():
 
     args = parse_args()
 
-    # Normalize seed: Nextflow may pass the literal string 'null' when no seed
-    # is configured. Accept 'null' (case-insensitive) and empty strings as None.
+    # Normalize seed: Nextflow may pass the literal string 'null' when no seed is configured. 
+    # Accept 'null' (case-insensitive) and empty strings as None.
     seed_arg = args.seed
    
     seed_str = str(seed_arg).lower()
@@ -63,13 +63,12 @@ def main():
 
     
     
-    #test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(copy.deepcopy(synergy_df), split_type, test_frac, val_frac, seed = seed)
     cv_settings = getattr(params, 'cv', {'enabled': False, 'n_folds': 5})
     cv_enabled = cv_settings.get('enabled', False)
 
     if params.train_type == 'regular' and cv_enabled:
         #When CV is enabled for regular training, treat args.run_no as the fold index.
-        #Each fold gets its own test set, and the remaining folds are used for training without an additional validation split.
+        #Each fold is used as the test set once, while the remaining folds are used for training.
         n_folds = int(cv_settings.get('n_folds', 5))
         fold_no = int(args.run_no)
         # Here cross-validation split is performed
@@ -83,8 +82,8 @@ def main():
         test_df = synergy_df.iloc[test_folds[fold_no]].copy()
         all_train_df = synergy_df.iloc[train_folds[fold_no]].reset_index(drop=True)
 
-        train_idx = {0: list(range(len(all_train_df)))}
-        val_idx = {0: []}
+        train_idx = {0: list(range(len(all_train_df)))} # use all training data for training
+        val_idx = {0: []} # no validation set is used in cross-validation, as each fold is used for testing in turn.
 
     else:
     # create one train/validation/test split using the split strategy and fractions in the config
@@ -112,7 +111,6 @@ def main():
     with open(args.cfeat_dict, 'rb') as fh:
         cfeat_dict = pickle.load(fh)
 
-    # expose run_no, seed and device variables used later
     
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -121,6 +119,8 @@ def main():
     seed_str = "null" if seed is None else str(seed)
     split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{test_frac}_{val_frac}/run_{args.run_no}_{seed_str}/"
     split_file_path = params.split_dir + split_info_str
+
+    # Here, autoencoder compression and normalization are applied to the drug and cell line features.
     cur_dfeat_dict, cur_cfeat_dict = post_split_processing(dfeat_dict, cfeat_dict, all_train_df, params, split_info_str, device)
 
 

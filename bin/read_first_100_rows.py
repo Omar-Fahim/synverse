@@ -2,7 +2,8 @@
 from pathlib import Path
 import random
 
-
+#This script was created to read the first 1000 rows of the synergy dataset and write them to a new file. 
+# This small dataset was used for testing on the local machine (PC)
 INPUT_PATH = r""  
 
 N = 1000
@@ -20,6 +21,7 @@ def main():
     header = lines[0]
     data = lines[1:]
 
+    # Shuffle the data and select the first N rows.
     random.shuffle(data)
 
     selected = data[:N]

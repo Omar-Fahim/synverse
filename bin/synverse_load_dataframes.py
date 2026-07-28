@@ -6,8 +6,7 @@ from parse_config import parse_config
 import pickle 
 import os
 
-#Drug Preprocess imports
-#from rdkit import Chem
+
 from preprocessing.rwr_runner import *
 from models.model_utils import *
 from preprocessing.pretrain.embedding_generator import get_pretrained_embedding
@@ -16,18 +15,18 @@ from torch_geometric import data as DATA
 from preprocess_utils import adjacency_list_to_edges
 
 
-#Cell line preprocess imports
+
 import pandas as pd
 import numpy as np
 
-#Load_Triplets Preprocess
+
 from preprocessing.synergy_data_preprocess import *
 from preprocessing.autoencoder import autoencoder_runner
 from preprocessing.preprocess_utils import *
 from preprocessing.preprocess import load_filter_triplets_features
 from utils import *
 from split import *
-#Panda already above
+
 
 
 def parse_args():
@@ -63,7 +62,7 @@ def load_synergy_file(path,score_name):
 
 
 
-
+# this method loads the synergy dataframe, drug and cell line features, and creates valid combinations of drug and cell line features based on the use, the max and min number of features specified in the config.
 def load_dataframes(params, inputs, device):
     synergy_file_path = inputs.synergy_file
     score_name = params.score_name

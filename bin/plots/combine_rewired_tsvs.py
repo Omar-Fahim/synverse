@@ -31,7 +31,7 @@ def parse_args():
     )
     return parser.parse_args()
 
-
+# This function reads a rewired TSV file and checks that it contains the required columns.
 def read_rewired_file(path):
     if not path.exists():
         raise FileNotFoundError(f"Missing file: {path}")
@@ -44,7 +44,9 @@ def read_rewired_file(path):
 
     return df
 
-
+# This method is used to combine the rewired tsv files from the SA and SM runs into one file for each split. 
+# The combined file will have the same columns as the original files, but will contain all rows from both files. 
+# The combined file will be written to the out_dir with the same name as the original files.
 def combine_split(sa_dir, sm_dir, out_dir, split):
     file_name = f"output_{split}_rewired.tsv"
     sa_file = sa_dir / file_name
@@ -52,11 +54,6 @@ def combine_split(sa_dir, sm_dir, out_dir, split):
     out_file = out_dir / file_name
 
     source_files = [sa_file.resolve(), sm_file.resolve()]
-    # if out_file.resolve() in source_files:
-    #     raise ValueError(
-    #         f"Refusing to overwrite an input file in-place: {out_file}. "
-    #         "Use a different --out-dir."
-    #     )
 
     sa_df = read_rewired_file(sa_file)
     sm_df = read_rewired_file(sm_file)
@@ -66,7 +63,8 @@ def combine_split(sa_dir, sm_dir, out_dir, split):
             f"Column mismatch for {file_name}. SA columns and SM columns must match after "
             "setting rewired/rewire_method."
         )
-
+    
+    # Combine the two dataframes into one, keeping all rows from both dataframes.
     combined_df = pd.concat([sa_df, sm_df], axis=0, ignore_index=True)
 
     out_dir.mkdir(parents=True, exist_ok=True)
