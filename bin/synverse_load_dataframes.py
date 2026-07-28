@@ -6,8 +6,7 @@ from parse_config import parse_config
 import pickle 
 import os
 
-#Drug Preprocess imports
-from rdkit import Chem
+
 from preprocessing.rwr_runner import *
 from models.model_utils import *
 from preprocessing.pretrain.embedding_generator import get_pretrained_embedding
@@ -16,18 +15,18 @@ from torch_geometric import data as DATA
 from preprocess_utils import adjacency_list_to_edges
 
 
-#Cell line preprocess imports
+
 import pandas as pd
 import numpy as np
 
-#Load_Triplets Preprocess
+
 from preprocessing.synergy_data_preprocess import *
 from preprocessing.autoencoder import autoencoder_runner
 from preprocessing.preprocess_utils import *
 from preprocessing.preprocess import load_filter_triplets_features
 from utils import *
 from split import *
-#Panda already above
+
 
 
 def parse_args():
@@ -63,20 +62,20 @@ def load_synergy_file(path,score_name):
 
 
 
-
+# this method loads the synergy dataframe, drug and cell line features, and creates valid combinations of drug and cell line features based on the use, the max and min number of features specified in the config.
 def load_dataframes(params, inputs, device):
     synergy_file_path = inputs.synergy_file
     score_name = params.score_name
-    #synergy_file_path = "/home/hpc/iwbn/iwbn136h/synergy/synergy_scores_S_mean_mean_shuffled_first1000.tsv"
+   # synergy_file_path = "/home/hpc/iwbn/iwbn136h/synergy/synergy_scores_S_mean_mean_shuffled_first1000.tsv"
 
     synergy_df = load_synergy_file(synergy_file_path, score_name)
     drug_pids = sorted(list(set(synergy_df['drug_1_pid']).union(set(synergy_df['drug_2_pid']))))
     cell_line_names = sorted(synergy_df['cell_line_name'].unique())
 
-    # dfeat_dict, dfeat_names = prepare_drug_features(drug_pids, params, inputs, device)
-    # cfeat_dict, cfeat_names = prepare_cell_line_features(cell_line_names, params, inputs, device)
-
+  
+    #create drug and cell line features and filter the synergy table based on the availability of features.
     synergy_df, dfeat_dict, cfeat_dict, drug_2_idx, cell_line_2_idx = load_filter_triplets_features(synergy_df, drug_pids, cell_line_names, inputs, params, device)
+    #create valid combinations of drug and cell line features based on the use, the max and min number of features specified in the config.
     drug_cell_feat_combs = get_feature_comb_wrapper(dfeat_dict, cfeat_dict,
                             max_drug_feat=params.max_drug_feat,
                             min_drug_feat = params.min_drug_feat, max_cell_feat=params.max_cell_feat, min_cell_feat = params.min_cell_feat)

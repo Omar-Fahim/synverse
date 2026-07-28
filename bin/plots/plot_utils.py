@@ -99,7 +99,7 @@ def bar_plot_subplots(data, x, y, ylabel, feature_filters, hue=None, y_min=None,
         if (y_min is not None) and (y_max is not None):
             ax.set_ylim(y_min, y_max)
 
-        if ft_filt_wise_1hot:
+        if ft_filt_wise_1hot and feature_filter in ft_filt_wise_1hot:
             ax.axhline(y=ft_filt_wise_1hot[feature_filter], color='red', linestyle='--', linewidth=0.8)
 
         # Store legend handles and labels for a shared legend
@@ -209,7 +209,7 @@ def box_plot_subplots(data, x, y, ylabel, feature_filters, hue=None, y_min=None,
             ax.yaxis.grid(True, linestyle='--', color='grey', alpha=0.6, linewidth=0.6)
             if (y_min is not None) and (y_max is not None):
                 ax.set_ylim(y_min, y_max)
-            if ft_filt_wise_1hot:
+            if ft_filt_wise_1hot  and feature_filter in ft_filt_wise_1hot:
                 ax.axhline(y=ft_filt_wise_1hot[feature_filter], color='red', linestyle='--', linewidth=0.8, zorder=10)
             if zero_line:
                 ax.axhline(y=0, color='red', linestyle='--', linewidth=0.8, zorder=10)
@@ -221,7 +221,7 @@ def box_plot_subplots(data, x, y, ylabel, feature_filters, hue=None, y_min=None,
             ax.xaxis.grid(True, linestyle='--', color='grey', alpha=0.6, linewidth=0.6)
             if (y_min is not None) and (y_max is not None):
                 ax.set_xlim(y_min, y_max)
-            if ft_filt_wise_1hot:
+            if ft_filt_wise_1hot  and feature_filter in ft_filt_wise_1hot:
                 ax.axvline(x=ft_filt_wise_1hot[feature_filter], color='red', linestyle='--', linewidth=0.8, zorder=10)
             if zero_line:
                 ax.axvline(x=0, color='red', linestyle='--', linewidth=0.8, zorder=10)
@@ -235,8 +235,7 @@ def box_plot_subplots(data, x, y, ylabel, feature_filters, hue=None, y_min=None,
     if legend and handles:
         fig.legend(handles, labels, loc='upper center', ncol=len(data[hue].unique()),
                    frameon=False, title=None, fontsize=12, bbox_to_anchor=(0.5, 1.02))
-
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
     if out_file_prefix is not None:
         os.makedirs(os.path.dirname(out_file_prefix), exist_ok=True)
         plot_file = f"{out_file_prefix}_boxplot.pdf"

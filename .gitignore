@@ -7,4 +7,6 @@ testing/
 testing*
 *.pyc
 null/
-assets/
+assets/*
+!assets/testdata/
+!assets/testdata/**

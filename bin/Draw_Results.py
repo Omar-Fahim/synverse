@@ -1,6 +1,10 @@
 import re
 import matplotlib.pyplot as plt
 
+
+
+# a script to plot the training and validation loss from the log file of the training process. 
+
 # Path to your log file
 log_file = "/home/omar/projects/nf-core-synverse/results/trainandeval/results/k_0.05_S_mean_mean/leave_comb/run_1_6/D_smiles_Transformer_Berttokenizer_C_genex_std_shuffled_0_training_final.log"
 
@@ -54,14 +58,13 @@ plt.plot(
     label='Validation Loss'
 )
 
-# Labels and title
+
 plt.xlabel("Epoch")
 plt.ylabel("Loss")
 plt.title("Training and Validation Loss")
 
-# Grid and legend
 plt.grid(True)
 plt.legend()
 
-# Show plot
+
 plt.show()

@@ -24,6 +24,7 @@ class HP_Worker(Worker):
         super().__init__(**kwargs)
         self.runner = runner_instance
         self.sleep_interval = sleep_interval
+        
 
     def compute(self, config, budget, working_directory, *args, **kwargs):
         """
@@ -166,4 +167,3 @@ class HP_Worker(Worker):
                 cs.add_hyperparameters([tx_batch_norm, tx_num_layers,tx_embedding_dim,tx_n_head,tx_ff_num_layers,tx_max_length,tx_pos_encoding ])
 
         return cs
-

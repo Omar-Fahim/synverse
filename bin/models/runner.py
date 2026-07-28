@@ -74,13 +74,13 @@ class Runner(ABC):
         self.params=params
         self.model_info = model_info
 
-        self.check_freq = 2 #previously ran with 2 , 3
-        self.tolerance = 45 #previously ran with 15, 30
+        self.check_freq = 1 #previously ran with 2 , 3
+        self.tolerance = 10 #previously ran with 15, 30
         self.batch_size = int(params.batch_size)
 
         self.log_file = self.out_file_prefix + '_training.log'
 
-    def init_model(self, config):
+    def init_model(self, config, device=None):
         model = SynVerseModel(self.drug_encoder_info, self.cell_encoder_info,
                               self.dfeat_dim_dict, self.cfeat_dim_dict,self.dfeat_file_dict, self.cfeat_file_dict,
                               self.drug_feat_encoder_mapping, self.cell_feat_encoder_mapping,
@@ -150,11 +150,11 @@ class Runner(ABC):
             NS = hpns.NameServer(run_id=run_id, host=name_server, port=0)
             ns_host, ns_port = NS.start()
 
-
             # w = self.worker_cls(self, sleep_interval=0, nameserver=name_server, run_id=run_id)
             w = self.worker_cls(self, sleep_interval=0, nameserver=ns_host, nameserver_port=ns_port, run_id=run_id)
 
             w.run(background=True)
+            
 
             # Step 3: Run an optimizer
             # The run method will return the `Result` that contains all runs performed.
@@ -173,7 +173,7 @@ class Runner(ABC):
         elif server_type == 'cluster':
             n_workers = kwargs.get('n_workers')
             worker = kwargs.get('worker')
-            run_id = kwargs.get('run_id')
+            run_id = self.bohb_params['run_id']
             # # Step 2: Start a worker #Nure: Model specific
             # formatted_time = datetime.now().strftime("%Y_%m_%d_%H_%M_%S")
             # run_id = f'{run_id}_{formatted_time}'
@@ -257,7 +257,7 @@ class Runner(ABC):
         if not validation: #train model with both training and validation data
             # load dataset
             model, optimizer, criterion = self.init_model(config)
-            train_loader = DataLoader(self.triplets_scores_dataset, batch_size=self.batch_size, shuffle=True)
+            train_loader = DataLoader(self.triplets_scores_dataset, batch_size=self.batch_size, shuffle=True, num_workers=4, pin_memory=True)
             # train model using the whole training data (including validation dataset)
             best_model_state,_,train_loss, _ = self.train_model(model, optimizer, criterion, train_loader,
                                             best_n_epochs, self.check_freq,
@@ -266,9 +266,9 @@ class Runner(ABC):
 
             if save_output:
                 # save the best model
-                model_file = self.out_file.replace('.txt', '_model.pth')
-                os.makedirs(os.path.dirname(model_file), exist_ok=True)
-                torch.save(best_model_state, model_file)
+                # model_file = self.out_file.replace('.txt', '_model.pth')
+                # os.makedirs(os.path.dirname(model_file), exist_ok=True)
+                # torch.save(best_model_state, model_file)
 
                 #save train_loss
                 # loss_file = self.out_file.replace('.txt', '_train_loss.txt')
@@ -298,8 +298,8 @@ class Runner(ABC):
                 train_subsampler = Subset(self.triplets_scores_dataset, fold_train_idx)
                 val_subsampler = Subset(self.triplets_scores_dataset, fold_val_idx)
 
-                train_loader = DataLoader(train_subsampler, batch_size=self.batch_size, shuffle=True)
-                val_loader = DataLoader(val_subsampler, batch_size=self.batch_size, shuffle=False)
+                train_loader = DataLoader(train_subsampler, batch_size=self.batch_size, shuffle=True, num_workers=4, pin_memory=True)
+                val_loader = DataLoader(val_subsampler, batch_size=self.batch_size, shuffle=False, num_workers=4, pin_memory=True)
 
                 best_model_state, val_loss[fold], train_loss[fold], req_epochs[fold] = self.train_model(model, optimizer,
                                     criterion, train_loader, best_n_epochs, self.check_freq,self.tolerance,
@@ -312,9 +312,9 @@ class Runner(ABC):
                     file.write(f'val_loss: {val_loss[fold]}\n\n')
 
                     # save the best model trained only on training split
-                    model_file = self.out_file.replace('.txt', f'_val_true_model_{fold}.pth')
-                    os.makedirs(os.path.dirname(model_file), exist_ok=True)
-                    torch.save(best_model_state, model_file)
+                    # model_file = self.out_file.replace('.txt', f'_val_true_model_{fold}.pth')
+                    # os.makedirs(os.path.dirname(model_file), exist_ok=True)
+                    # torch.save(best_model_state, model_file)
 
         return best_model_state, train_loss
 
@@ -470,7 +470,7 @@ class Runner(ABC):
         '''
         :return:
         '''
-        test_loader = DataLoader(self.get_triplets_score_dataset(test_df, score_name=self.score_name), batch_size=4096, shuffle=True)
+        test_loader = DataLoader(self.get_triplets_score_dataset(test_df, score_name=self.score_name), batch_size=4096, shuffle=True, num_workers=4, pin_memory=True)
         # evaluate model on test dataset
         model, optimizer, criterion = self.init_model(config)
         model.load_state_dict(best_model_state)

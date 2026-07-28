@@ -131,6 +131,9 @@ def get_feature_comb_wrapper(dfeat_dict, cfeat_dict, max_drug_feat, min_drug_fea
 def keep_selected_feat(feat_dict, selected_feat):
     fields = ['norm', 'preprocess', 'encoder', 'value', 'dim', 'use','compress', 'file']  # for each feature we can have these fields.
     select_feat_dict = {field: {} for field in fields}
+    if isinstance(selected_feat, str):
+        selected_feat = [selected_feat]
+    selected_feat = set(selected_feat)
 
     for field in fields:
         select_feat_dict[field] = {feat_name: feat_dict[field][feat_name] for feat_name in feat_dict[field]

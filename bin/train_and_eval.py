@@ -55,6 +55,18 @@ def load_params(path):
     return SimpleNamespace(**load_json(path))
 
 
+def parse_feature_arg(value):
+    if isinstance(value, list):
+        return value
+
+    value = str(value).strip()
+    if value.startswith("[") and value.endswith("]"):
+        value = value[1:-1].strip()
+    if not value:
+        return []
+    return [item.strip().strip("'\"") for item in value.split(",")]
+
+
 
 
 
@@ -79,8 +91,8 @@ def main():
     val_idx = load_pickle(args.val_idx_file)
     cur_dfeat_dict = load_pickle(args.dfeat_file)
     cur_cfeat_dict = load_pickle(args.cfeat_file)
-    select_drug_feat = args.drug_feat
-    select_cell_feat = args.cell_feat
+    select_drug_feat = parse_feature_arg(args.drug_feat)
+    select_cell_feat = parse_feature_arg(args.cell_feat)
     split_type = args.split_type
     run_no = args.run_no
     cell_line_2_idx = load_pickle(args.cell_line_2_idx)
@@ -90,23 +102,36 @@ def main():
     
     print("drug and cell line features in use:", select_drug_feat, select_cell_feat)
 
+    # Keep only the selected features in the feature dictionaries
     select_dfeat_dict = keep_selected_feat(cur_dfeat_dict, select_drug_feat)
     select_cfeat_dict = keep_selected_feat(cur_cfeat_dict, select_cell_feat)
 
+    # Get model info and hyperparameters based on the selected features
     select_model_info = get_select_model_info(params.model_info, select_dfeat_dict['encoder'], select_cfeat_dict['encoder'])
     params.hyperparam = combine_hyperparams(select_model_info)
     given_epochs = params.epochs
-    feat_str = get_feat_prefix(cur_dfeat_dict, cur_cfeat_dict) # In the original synverse code, he uses the dfeat_dict and cfeat_dict before the splitting. It is just a method for naming files so it is just added complexity to keep passing the orignal dictionaries 
+
+    # Create an output file prefix based on the selected features
+    feat_str = get_feat_prefix(cur_dfeat_dict, cur_cfeat_dict) 
     out_file_prefix = create_file_prefix(params, select_dfeat_dict, select_cfeat_dict, split_type,
                                                       split_feat_str=feat_str, run_no=run_no, seed=seed)
+
     
     split_info_str = f"/{feat_str}/k_{params.abundance}_{params.score_name}/{split_type}_{args.test_frac}_{args.val_frac}/run_{run_no}_{seed}/"
     split_file_path = params.split_dir + split_info_str
+
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
+
     
+    # if cv is enabled and train_type is regular, we will use a different file prefix for the output files
+    cv_settings = getattr(params, 'cv', {'enabled': False})
+    cv_enabled = cv_settings.get('enabled', False)
+
+    file_prefix = '_cv_' if params.train_type == 'regular' and cv_enabled else '_val_true_'
+
     run_manager = RunManagerFactory.get_run_manager(params, select_model_info, given_epochs, all_train_df,
-                             train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, '_val_true_', device,train_type=params.train_type,split_file_path=split_file_path,val_frac=args.val_frac,test_frac=args.test_frac,split_type=split_type)
+                             train_idx, val_idx, select_dfeat_dict, select_cfeat_dict, test_df, drug_2_idx,cell_line_2_idx, out_file_prefix, file_prefix, device,train_type=params.train_type,split_file_path=split_file_path,val_frac=args.val_frac,test_frac=args.test_frac,split_type=split_type)
     run_manager.run_wrapper()
 
 
