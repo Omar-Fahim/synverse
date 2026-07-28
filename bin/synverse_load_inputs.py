@@ -122,7 +122,7 @@ def main():
 
     
     active_cell_line_feature_names  = [f["name"] for f in input_settings.get("cell_line_features", [])]
-
+# Here I validate that all active cell line features have corresponding file keys in the config and that those file paths are valid.
     for feature, file_keys in CELL_LINE_FEATURE_FILE_MAP.items():
         if feature in active_cell_line_feature_names:
             for file_key in file_keys:

@@ -105,7 +105,7 @@ class RandomizeScoreRunManager(BaseRunManager):
         for rand_version in range(5):
             # randomized_train_file = f'{split_file_path}{rand_version}all_train_randomized_score.tsv'
             randomized_df = pd.DataFrame()
-
+            # Loop through each edge type and shuffle the scores within that edge type (edge type is the cell line)
             edge_types = set(self.train_df['edge_type'].unique())
             for edge_type in edge_types:
                 edge_pos_df = self.train_df[(self.train_df['edge_type'] == edge_type) & (self.train_df[self.params.score_name]>=0)].copy()

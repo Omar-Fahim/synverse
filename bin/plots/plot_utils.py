@@ -235,8 +235,7 @@ def box_plot_subplots(data, x, y, ylabel, feature_filters, hue=None, y_min=None,
     if legend and handles:
         fig.legend(handles, labels, loc='upper center', ncol=len(data[hue].unique()),
                    frameon=False, title=None, fontsize=12, bbox_to_anchor=(0.5, 1.02))
-
-    plt.tight_layout()
+    plt.tight_layout(rect=[0, 0, 1, 0.97])
     if out_file_prefix is not None:
         os.makedirs(os.path.dirname(out_file_prefix), exist_ok=True)
         plot_file = f"{out_file_prefix}_boxplot.pdf"

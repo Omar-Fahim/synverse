@@ -54,14 +54,13 @@ def main():
 
     inputs, params = load_parsed_config(args.parsed_config_path)
 
-    # Load the dataset
+    # Load the synergy dataset and split settings for this run.
     synergy_df = pd.read_csv(args.dataset_path, sep="\t")
     split_type = args.split_type
     test_frac = args.test_frac
     val_frac = args.val_frac
 
 
-    # Perform the split using the wrapper function
     
     
     #test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(copy.deepcopy(synergy_df), split_type, test_frac, val_frac, seed = seed)
@@ -69,16 +68,18 @@ def main():
     cv_enabled = cv_settings.get('enabled', False)
 
     if params.train_type == 'regular' and cv_enabled:
+        #When CV is enabled for regular training, treat args.run_no as the fold index.
+        #Each fold gets its own test set, and the remaining folds are used for training without an additional validation split.
         n_folds = int(cv_settings.get('n_folds', 5))
         fold_no = int(args.run_no)
-
+        # Here cross-validation split is performed
         train_folds, test_folds = split_cv(
             copy.deepcopy(synergy_df),
             split_type_map[split_type],
             n_folds=n_folds,
             seed=seed
         )
-
+        
         test_df = synergy_df.iloc[test_folds[fold_no]].copy()
         all_train_df = synergy_df.iloc[train_folds[fold_no]].reset_index(drop=True)
 
@@ -86,6 +87,7 @@ def main():
         val_idx = {0: []}
 
     else:
+    # create one train/validation/test split using the split strategy and fractions in the config
         test_df, all_train_df, train_idx, val_idx = wrapper_test_train_val(
             copy.deepcopy(synergy_df),
             split_type,

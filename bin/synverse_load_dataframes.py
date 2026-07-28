@@ -73,10 +73,10 @@ def load_dataframes(params, inputs, device):
     drug_pids = sorted(list(set(synergy_df['drug_1_pid']).union(set(synergy_df['drug_2_pid']))))
     cell_line_names = sorted(synergy_df['cell_line_name'].unique())
 
-    # dfeat_dict, dfeat_names = prepare_drug_features(drug_pids, params, inputs, device)
-    # cfeat_dict, cfeat_names = prepare_cell_line_features(cell_line_names, params, inputs, device)
-
+  
+    #create drug and cell line features and filter the synergy table based on the availability of features.
     synergy_df, dfeat_dict, cfeat_dict, drug_2_idx, cell_line_2_idx = load_filter_triplets_features(synergy_df, drug_pids, cell_line_names, inputs, params, device)
+    #create valid combinations of drug and cell line features based on the use, the max and min number of features specified in the config.
     drug_cell_feat_combs = get_feature_comb_wrapper(dfeat_dict, cfeat_dict,
                             max_drug_feat=params.max_drug_feat,
                             min_drug_feat = params.min_drug_feat, max_cell_feat=params.max_cell_feat, min_cell_feat = params.min_cell_feat)
