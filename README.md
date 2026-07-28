@@ -81,9 +81,8 @@ When `train_type: rewire` is selected, choose the rewiring method by setting the
 Create and activate a separate plotting environment before running the parsing and plotting scripts:
 
 ```bash
-conda create -n synverse_plotting 
-conda activate synverse_plotting
-pip install -r envs/plotting-requirements.txt
+conda env create -f user.yml 
+conda activate synverse_plotting_env
 ```
 
 After the pipeline finishes, parse the training output files before generating plots. Use the same config file that was used for the pipeline run so the plotting script can find `output_dir`, `score_name`, `abundance`, and the configured split types.
